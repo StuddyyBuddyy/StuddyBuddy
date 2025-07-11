@@ -28,15 +28,17 @@ class DAO {
 
     suspend fun getUserSessions(email: String): List<Session> {
         return try {
-            client.post("$url/sessions/user") {
-                contentType(ContentType.Application.Json)
-                setBody(mapOf("email" to email))
+            client.get("$url/sessions") {
+                url {
+                    parameters.append("email", email)
+                }
             }.body()
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()
         }
     }
+
 
 
     suspend fun insertUser(user: User): Boolean {
