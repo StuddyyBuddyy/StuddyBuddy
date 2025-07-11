@@ -1,4 +1,67 @@
 package appdev.studybuddy.models
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.*
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
+import io.ktor.serialization.kotlinx.json.json
 
 class DAO {
+    val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json()
+        }
+    }
+    val url = "http://appdev.eliasraunig.com"
+
+    suspend fun getAllUsers(): List<User> {
+        return try {
+            client.get("$url/users").body()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    suspend fun getUserSessions(email: String): List<Session> {
+        return try {
+            client.post("$url/sessions/user") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("email" to email))
+            }.body()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+
+    suspend fun insertUser(user: User): Boolean {
+        return try {
+            val response = client.post("$url/users") {
+                contentType(ContentType.Application.Json)
+                setBody(user)
+            }
+            response.status.isSuccess()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun insertSession(session: Session): Boolean {
+        return try {
+            val response = client.post("$url/sessions") {
+                contentType(ContentType.Application.Json)
+                setBody(session)
+            }
+            response.status.isSuccess()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }
