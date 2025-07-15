@@ -58,9 +58,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("io.ktor:ktor-client-core:2.3.5")
-    implementation("io.ktor:ktor-client-cio:2.3.5")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation(libs.ktor.client.core.v235)
+    implementation(libs.ktor.client.cio.v235)
+    implementation(libs.ktor.client.content.negotiation.v235)
+    implementation(libs.ktor.serialization.kotlinx.json.v235)
+    implementation(libs.kotlinx.serialization.json.v151)
 }
