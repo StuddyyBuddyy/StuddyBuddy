@@ -50,6 +50,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.ktor.client.core.v235)
+    implementation(libs.ktor.client.cio.v235)
+    implementation(libs.ktor.client.content.negotiation.v235)
+    implementation(libs.ktor.serialization.kotlinx.json.v235)
+    implementation(libs.kotlinx.serialization.json.v151)
+    implementation(libs.androidx.navigation.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -58,9 +65,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.ktor.client.core.v235)
-    implementation(libs.ktor.client.cio.v235)
-    implementation(libs.ktor.client.content.negotiation.v235)
-    implementation(libs.ktor.serialization.kotlinx.json.v235)
-    implementation(libs.kotlinx.serialization.json.v151)
 }
