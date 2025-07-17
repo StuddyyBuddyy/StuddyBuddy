@@ -3,6 +3,7 @@ package appdev.studybuddy.composables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -23,7 +24,8 @@ fun LoginScreen(navController: NavController){
         Navigiere entweder zur ExampleDB oder zum provisorischen Homescreen
      */
     Column(
-        modifier = Modifier.padding(10.dp),
+        modifier = Modifier.padding(10.dp)
+                        .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
