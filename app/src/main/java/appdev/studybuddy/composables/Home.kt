@@ -2,12 +2,14 @@ package appdev.studybuddy.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,7 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
@@ -64,29 +66,87 @@ fun StartSessionDialog(
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var useMicrophoneSensor by remember {mutableStateOf(false)}
+    var useVibrationSensor by remember {mutableStateOf(false)}
+    var useBrightnessSensor by remember {mutableStateOf(false)}
+
     AlertDialog(
         onDismissRequest = onDismiss,
 
         title = {
-            Text(text = "Start New Session?")
+            Text(text = "Start New Session",
+                fontSize = 20.sp)
         },
         text = {
-            Text(text = "Are you ready to begin a new game session? This action cannot be undone.") // Content of the dialog
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Allow Volume Feedback:",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = useMicrophoneSensor,
+                        onCheckedChange = { useMicrophoneSensor = it }
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Allow Vibration Feedback:",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = useVibrationSensor,
+                        onCheckedChange = { useVibrationSensor = it }
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Allow Brightness Feedback:",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked =useBrightnessSensor,
+                        onCheckedChange = { useBrightnessSensor = it }
+                    )
+                }
+            }
         },
+
         confirmButton = {
             Button(
-                onClick = onConfirm // When confirmed, call the onConfirm callback
+                onClick = onConfirm
             ) {
-                Text("Start Session") // Text for the confirm button
+                Text("Start Session")
             }
         },
+
         dismissButton = {
-            Button( // Using TextButton for a secondary action
-                onClick = onDismiss // When dismissed, call the onDismiss callback
+            Button(
+                onClick = onDismiss
             ) {
-                Text("Cancel") // Text for the dismiss button
+                Text("Cancel")
             }
         },
-        modifier = modifier // Apply the external modifier to the AlertDialog itself
+
+        modifier = modifier
     )
 }
