@@ -7,13 +7,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 import appdev.studybuddy.composables.NavSetup
 import appdev.studybuddy.models.*
+import appdev.studybuddy.ui.theme.StudyBuddyTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            StudyBuddyTheme {
                 //Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -> }
                 NavSetup()
             }
