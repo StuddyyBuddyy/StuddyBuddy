@@ -16,6 +16,7 @@ fun NavSetup(){
 
     NavHost(navController, startDestination = "login"){
         composable("login"){LoginScreen(navController, userVM)}
+        composable("register"){RegisterScreen(navController, userVM)}
         composable("home"){}
     }
 }

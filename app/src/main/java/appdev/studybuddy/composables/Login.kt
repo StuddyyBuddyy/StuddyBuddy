@@ -81,8 +81,78 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             }
 
             Button(
-                    onClick = {}
+                    onClick = {
+                        navController.navigate("register")
+                    }
                     ) {
+                Text(text = "Register")
+            }
+
+        }
+    }
+}
+
+@Composable
+fun RegisterScreen(navController: NavController, userVM: UserVM){
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var failed by remember { mutableStateOf(false) }
+
+    Scaffold { innerPadding ->
+        Column (
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "StudyBuddy"
+            )
+
+            Box(
+                modifier = Modifier.height(48.dp).fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (failed) {
+                    Text("User already exists!")
+                }
+            }
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("E-Mail Address")}
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username")}
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = {Text("Password")}
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            Button(
+                onClick = {
+                    if(userVM.register(email, password, username)){
+                        navController.navigate("home")
+                    } else {
+                        failed = true
+                    }
+                }
+            ) {
                 Text(text = "Register")
             }
 
