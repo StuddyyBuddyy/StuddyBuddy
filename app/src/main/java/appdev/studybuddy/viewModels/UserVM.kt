@@ -29,4 +29,18 @@ class UserVM : ViewModel() {
             return false
         }
     }
+
+    fun register(email: String, password: String, username : String): Boolean {
+        val user = User(username, email, password)
+        var success : Boolean
+        runBlocking {
+            success = dao.insertUser(user)
+        }
+
+        if(success){
+            currentUser = user
+        }
+
+        return success
+    }
 }
