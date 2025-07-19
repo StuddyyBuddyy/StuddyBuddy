@@ -1,52 +1,91 @@
 package appdev.studybuddy.composables
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import appdev.studybuddy.viewModels.UserVM
 
 @Composable
-fun LoginScreen(navController: NavController){
-    //todo design login screen
+fun LoginScreen(navController: NavController, userVM: UserVM){
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var failed by remember { mutableStateOf(false) }
 
-    /*
-        Platzhalter als Startbildschirm
-        Navigiere entweder zur ExampleDB oder zum provisorischen Homescreen
-     */
-    Column(
-        modifier = Modifier.padding(10.dp)
-                        .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ){
-        Button(
-            onClick = {
-                navController.navigate("exampledb")
-            }
+    Scaffold { innerPadding ->
+        Column (
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "to Exampledb")
-        }
+            Text(
+                text = "StudyBuddy"
+            )
 
-        Spacer(modifier = Modifier.size(10.dp))
-
-        Button(
-            onClick = {
-                navController.navigate("home")
+            Box(
+                modifier = Modifier.height(48.dp).fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (failed) {
+                    Text("Email or Password is wrong!")
+                }
             }
-        ) {
-            Text(text = "to HomeScreen")
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("E-Mail Address")}
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = {Text("Password")}
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            Button(
+                onClick = {
+                    if(userVM.login(email, password)){
+                        navController.navigate("home")
+                    } else {
+                        failed = true
+                    }
+                }
+            ) {
+                Text(text = "Login")
+            }
+
+            Button(
+                    onClick = {}
+                    ) {
+                Text(text = "Register")
+            }
+
         }
     }
-
-
 }

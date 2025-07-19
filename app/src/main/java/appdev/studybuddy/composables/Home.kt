@@ -46,8 +46,6 @@ fun HomeScreen(navController: NavController){
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        Spacer(modifier = Modifier.padding(10.dp))
-
         Button(
             onClick = {
                 displayDialog = true

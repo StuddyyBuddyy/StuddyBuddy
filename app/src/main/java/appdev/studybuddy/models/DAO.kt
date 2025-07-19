@@ -26,6 +26,13 @@ class DAO {
         }
     }
 
+    //TODO temporary, change to direct calling
+    suspend fun getUserByEmail(email: String): User? {
+        val users = getAllUsers()
+        users.forEach{user -> if (user.email == email) return user}
+        return null
+    }
+
     suspend fun getUserSessions(email: String): List<Session> {
         return try {
             client.get("$url/sessions") {

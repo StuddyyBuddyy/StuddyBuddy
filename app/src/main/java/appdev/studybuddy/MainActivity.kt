@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
-import appdev.studybuddy.composables.Navigation
+import appdev.studybuddy.composables.NavSetup
 import appdev.studybuddy.models.*
 import appdev.studybuddy.ui.theme.StudyBuddyTheme
 
@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             StudyBuddyTheme {
                 //Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -> }
-                Navigation()
+                NavSetup()
             }
         }
     }
