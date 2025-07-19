@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
+import appdev.studybuddy.composables.NavSetup
 import appdev.studybuddy.models.*
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +15,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 //Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -> }
-                ExampleDBScreen(DAO())
+                NavSetup()
             }
         }
     }
