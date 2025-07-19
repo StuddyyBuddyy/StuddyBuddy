@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import appdev.studybuddy.models.Session
+import java.util.Calendar
+import kotlin.Int
 
 @Composable
 fun HomeScreen(navController: NavController){
@@ -30,7 +38,7 @@ fun HomeScreen(navController: NavController){
     if (displayDialog){
         StartSessionDialog(
             onDismiss = {displayDialog = false},
-            onConfirm = {},
+            navController = navController
         )
     }
 
@@ -58,15 +66,22 @@ fun HomeScreen(navController: NavController){
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartSessionDialog(
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     var useMicrophoneSensor by remember {mutableStateOf(false)}
     var useVibrationSensor by remember {mutableStateOf(false)}
     var useBrightnessSensor by remember {mutableStateOf(false)}
+
+    val timeInputState = rememberTimePickerState(
+        initialHour = 2,
+        initialMinute = 0,
+        is24Hour = true,
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -82,6 +97,11 @@ fun StartSessionDialog(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+
+                TimeInput(
+                    state = timeInputState
+                )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -131,7 +151,9 @@ fun StartSessionDialog(
 
         confirmButton = {
             Button(
-                onClick = onConfirm
+                onClick = {
+
+                }
             ) {
                 Text("Start Session")
             }

@@ -86,6 +86,14 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
                 Text(text = "Register")
             }
 
+            Button(
+                onClick = {
+                    navController.navigate("home")
+                }
+            ) {
+                Text(text = "debug: directly to Home")
+            }
+
         }
     }
 }

@@ -54,11 +54,11 @@ dependencies {
     implementation(libs.ktor.client.cio.v235)
     implementation(libs.ktor.client.content.negotiation.v235)
     implementation(libs.ktor.serialization.kotlinx.json.v235)
-    implementation(libs.kotlinx.serialization.json.v151)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.kotlinx.serialization.json.v173)
 
     testImplementation(libs.junit)
-    implementation(libs.androidx.navigation.compose)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -66,9 +66,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
-    implementation("io.ktor:ktor-client-cio:2.3.5")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 }
