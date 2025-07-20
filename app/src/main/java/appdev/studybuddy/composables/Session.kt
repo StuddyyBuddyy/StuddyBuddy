@@ -10,4 +10,7 @@ import appdev.studybuddy.viewModels.SessionVM
 fun SessionScreen(navController: NavController,
                   viewModel: SessionVM,
                   session: Session? = null){
+
+
+
 }
