@@ -1,6 +1,7 @@
 [versions]
 agp = "8.9.3"
 datastorePreferences = "1.1.7"
+hiltAndroid = "2.57"
 jetbrainsKotlinxSerializationJson = "1.7.3"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
@@ -11,9 +12,9 @@ ktorClientCioVersion = "2.3.5"
 ktorClientContentNegotiationVersion = "2.3.5"
 ktorClientCoreVersion = "2.3.5"
 ktorSerializationKotlinxJsonVersion = "2.3.5"
-lifecycleRuntimeKtx = "2.9.1"
+lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
-composeBom = "2025.06.01"
+composeBom = "2025.07.00"
 lifecycleViewmodelCompose = "2.9.2"
 navigationCompose = "2.9.2"
 
@@ -23,6 +24,8 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

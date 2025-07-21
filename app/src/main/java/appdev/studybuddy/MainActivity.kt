@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import appdev.studybuddy.composables.NavSetup
 import appdev.studybuddy.models.*
 import appdev.studybuddy.ui.theme.StudyBuddyTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

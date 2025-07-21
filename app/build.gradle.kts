@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -38,6 +40,16 @@ android {
     buildFeatures {
         compose = true
     }
+
+    kotlin {
+        sourceSets.all {
+            languageSettings.apply {
+                languageVersion = "1.9"
+                apiVersion = "1.9"
+            }
+        }
+    }
+
 }
 
 dependencies {
@@ -59,6 +71,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json.v173)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
