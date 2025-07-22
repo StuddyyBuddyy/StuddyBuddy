@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -107,6 +108,10 @@ fun SessionSettingsDialog(
         initialMinute = 0,
         is24Hour = true,
     )
+
+    LaunchedEffect(timeInputState.hour, timeInputState.minute) { //listen for changes in timeInputState
+        viewModel.setDuration(timeInputState.hour, timeInputState.minute)
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,

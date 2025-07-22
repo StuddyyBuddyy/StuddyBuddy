@@ -16,7 +16,9 @@ import javax.inject.Singleton
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "preferences")
 
-
+/**
+ * PreferenceDataStore to store last user login data or last session data
+ */
 class UserPreferences (
     private val context: Context
 ){

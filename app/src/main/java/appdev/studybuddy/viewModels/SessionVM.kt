@@ -45,14 +45,22 @@ class SessionVM @Inject  constructor(
 
     fun setUseMicrophoneSensor(useMicrophoneSensor: Boolean){
         _useMicrophoneSensor.value = useMicrophoneSensor
+        viewModelScope.launch { userPreferences.saveLastUseMicrophoneSensor(useMicrophoneSensor)}
     }
 
     fun setUseVibrationSensor(useVibrationSensor: Boolean){
         _useVibrationSensor.value = useVibrationSensor
+        viewModelScope.launch { userPreferences.saveLastUseVibrationSensor(useVibrationSensor)}
     }
 
     fun setUseBrightnessSensor(useBrightnessSensor: Boolean){
         _useBrightnessSensor.value = useBrightnessSensor
+        viewModelScope.launch { userPreferences.saveLastUseBrightnessSensor(useBrightnessSensor) }
+    }
+
+    fun setDuration(hours: Int, minutes: Int){
+        _duration.value = hours * 60 + minutes
+        viewModelScope.launch { userPreferences.saveLastSessionDuration(hours * 60 + minutes) }
     }
 
 }
