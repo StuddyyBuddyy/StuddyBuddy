@@ -104,8 +104,8 @@ fun SessionSettingsDialog(
     var useBrightnessSensor = viewModel.useBrightnessSensor.collectAsState()
 
     val timeInputState = rememberTimePickerState(
-        initialHour = 2,
-        initialMinute = 0,
+        initialHour = 0,
+        initialMinute = 5,
         is24Hour = true,
     )
 
