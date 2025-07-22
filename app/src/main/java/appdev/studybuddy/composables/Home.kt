@@ -29,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.viewModels.HomeVM
 import appdev.studybuddy.viewModels.SessionVM
@@ -96,7 +96,7 @@ fun SessionSettingsDialog(
     onDismiss: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SessionVM = viewModel()
+    viewModel: SessionVM = hiltViewModel()
 ) {
     var useMicrophoneSensor = viewModel.useMicrophoneSensor.collectAsState()
     var useVibrationSensor = viewModel.useVibrationSensor.collectAsState()

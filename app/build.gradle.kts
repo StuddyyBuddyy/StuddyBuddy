@@ -72,7 +72,11 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.fragment)
+    implementation(libs.androidx.hilt.navigation.compose)
+
     ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
 
 
     testImplementation(libs.junit)

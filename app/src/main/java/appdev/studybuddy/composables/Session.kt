@@ -8,7 +8,6 @@ import appdev.studybuddy.viewModels.SessionVM
 
 @Composable
 fun SessionScreen(navController: NavController,
-                  viewModel: SessionVM,
                   session: Session? = null){
 
 

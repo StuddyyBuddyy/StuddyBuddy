@@ -18,7 +18,7 @@ fun NavSetup(){
     val navController = rememberNavController()
 
     val dataVM : DataVM = viewModel()
-    val sessionVM : SessionVM = viewModel()
+    // sessionVM : SessionVM = viewModel()
     val homeVM: HomeVM = viewModel()
     val userVM : UserVM = viewModel()
 
@@ -37,7 +37,7 @@ fun NavSetup(){
         }
         composable("session") {
             SessionScreen(
-                navController = navController, viewModel = sessionVM
+                navController = navController
             )
         }
         composable("exampledb") {

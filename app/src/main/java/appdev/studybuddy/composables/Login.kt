@@ -96,6 +96,16 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
                 Text(text = "debug: directly to Home")
             }
 
+            //debug Button: Später wieder entfernen nur das man direkt zum ExampleDB kommt
+            Button(
+                onClick = {
+                    navController.navigate("exampledb")
+
+                }
+            ) {
+                Text(text = "debug: directly to Example db")
+            }
+
         }
     }
 }

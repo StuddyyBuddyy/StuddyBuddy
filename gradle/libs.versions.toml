@@ -2,6 +2,7 @@
 agp = "8.9.3"
 datastorePreferences = "1.1.7"
 hiltAndroid = "2.57"
+hiltNavigationFragment = "1.2.0"
 jetbrainsKotlinxSerializationJson = "1.7.3"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
@@ -17,11 +18,15 @@ activityCompose = "1.10.1"
 composeBom = "2025.07.00"
 lifecycleViewmodelCompose = "2.9.2"
 navigationCompose = "2.9.2"
+androidx-hilt-compiler = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastorePreferences" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationFragment" }
+androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-fragment", version.ref = "hiltNavigationFragment" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltNavigationFragment" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
@@ -44,6 +49,7 @@ ktor-client-cio-v235 = { module = "io.ktor:ktor-client-cio", version.ref = "ktor
 ktor-client-content-negotiation-v235 = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiationVersion" }
 ktor-client-core-v235 = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCoreVersion" }
 ktor-serialization-kotlinx-json-v235 = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJsonVersion" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidx-hilt-compiler" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
