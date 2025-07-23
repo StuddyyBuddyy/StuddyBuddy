@@ -11,6 +11,6 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 val PurpleButton = Color(0xFF5B406F)
 
-val Beige = Color(0xFFFFF3DA);
+val Beige = Color(0xFFFFF3DA)
 
 val logOutRed = Color(0xFF710827)

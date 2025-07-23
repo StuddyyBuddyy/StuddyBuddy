@@ -1,5 +1,6 @@
 package appdev.studybuddy.composables
 
+import LeaderboardScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
@@ -46,5 +47,12 @@ fun NavSetup(){
         composable("exampledb") {
             ExampleDBScreen(DAO())
         }
+
+        composable("leaderboard") {
+            LeaderboardScreen(
+                navController = navController
+            )
+        }
+
     }
 }

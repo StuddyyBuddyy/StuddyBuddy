@@ -1,5 +1,6 @@
 package appdev.studybuddy.composables
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
@@ -33,11 +35,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import appdev.studybuddy.R
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
 import appdev.studybuddy.ui.theme.logOutRed
@@ -76,26 +79,45 @@ fun HomeScreen(navController: NavController,
         )
     }
 
-    //todo design home screen
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(PurpleBackground)
     ) {
 
-        Button(
-            onClick = {
-                displayLogoutDialog = true
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = PurpleButton,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(15.dp),
+        Row(
             modifier = Modifier
-                .padding(15.dp)
+                .padding(top = 30.dp, start = 15.dp, end = 15.dp)
         ) {
-            Text(text = "Logout")
+            Button(
+                onClick = {
+                    displayLogoutDialog = true
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PurpleButton,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(15.dp),
+            ) {
+                Text(text = "Logout")
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            IconButton(
+                onClick = {
+                    navController.navigate("leaderboard")
+                },
+                modifier = Modifier
+                    .background(PurpleButton, shape = RoundedCornerShape(15.dp))
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.trophyicon),
+                    contentDescription = "Trophy",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
+                )
+            }
         }
 
         Column(
@@ -142,6 +164,9 @@ fun HomeScreen(navController: NavController,
     }
 }
 
+/**
+ * Dialog um den Logout zu bestätigen/ zu canceln
+ */
 @Composable
 fun LogoutDialog(
     onDismiss: () -> Unit,
@@ -150,7 +175,6 @@ fun LogoutDialog(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PurpleBackground)
     ) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -177,7 +201,8 @@ fun LogoutDialog(
                     Text("No, Cancel", color = PurpleButton)
                 }
             },
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            containerColor = PurpleBackground
         )
     }
 }
