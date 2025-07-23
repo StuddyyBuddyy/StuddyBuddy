@@ -43,4 +43,8 @@ class UserVM : ViewModel() {
 
         return success
     }
+
+    fun logout(){
+        currentUser = null
+    }
 }

@@ -1,5 +1,6 @@
 package appdev.studybuddy.composables
 
+import LeaderboardScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
@@ -32,11 +33,8 @@ fun NavSetup(){
         composable("register"){
             RegisterScreen(navController, userVM)
         }
-        composable("home/{username}/{email}") { backStackEntry ->
-            val username = backStackEntry.arguments?.getString("username")
-            val email = backStackEntry.arguments?.getString("email")
-
-            if (username!= null && email!= null) HomeScreen(navController = navController,homeVM,username,email)
+        composable("home") {
+            HomeScreen(navController = navController,userVM)
         }
         composable("session") {
             SessionScreen(
@@ -46,5 +44,12 @@ fun NavSetup(){
         composable("exampledb") {
             ExampleDBScreen(DAO())
         }
+
+        composable("leaderboard") {
+            LeaderboardScreen(
+                navController = navController
+            )
+        }
+
     }
 }

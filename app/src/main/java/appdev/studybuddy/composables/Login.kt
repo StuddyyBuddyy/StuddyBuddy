@@ -37,6 +37,7 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text(
                 text = "StudyBuddy"
             )
@@ -69,7 +70,7 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             Button(
                 onClick = {
                     if(userVM.login(email, password)){
-                        navController.navigate("home/${userVM.currentUser?.username}/${email}")
+                        navController.navigate("home")
                     } else {
                         failed = true
                     }
@@ -89,7 +90,7 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             //debug Button: Später wieder entfernen nur das man direkt zum Home-Screen kommt
             Button(
                 onClick = {
-                    navController.navigate("home/Filler/Filler@at")
+                    navController.navigate("home")
 
                 }
             ) {
