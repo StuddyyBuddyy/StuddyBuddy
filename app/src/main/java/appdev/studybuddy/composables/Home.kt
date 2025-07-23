@@ -1,5 +1,6 @@
 package appdev.studybuddy.composables
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.ui.theme.PurpleBackground
@@ -51,13 +53,11 @@ import appdev.studybuddy.viewModels.UserVM
 
 @Composable
 fun HomeScreen(navController: NavController,
-               viewModel: HomeVM,
-               username: String,
-               email: String){
+               userVM: UserVM,
+               ){
 
     var displaySessionDialog by remember{ mutableStateOf(false) }
     var displayLogoutDialog by remember { mutableStateOf(false) }
-    val userVM: UserVM = hiltViewModel()
 
     if (displaySessionDialog){
         SessionSettingsDialog(
@@ -70,7 +70,9 @@ fun HomeScreen(navController: NavController,
         LogoutDialog(
             onDismiss = { displayLogoutDialog = false },
             onClick = {
+                Log.d("Logout", "Logout before ${userVM.currentUser}")
                 userVM.logout()
+                Log.d("Logout", "Logout after ${userVM.currentUser}")
                 displayLogoutDialog = false
                 navController.navigate("login") {
                     popUpTo("home") { inclusive = true }
@@ -127,7 +129,7 @@ fun HomeScreen(navController: NavController,
         ) {
 
             Text(
-                text = "Hello $username!",
+                text = "Hello ${userVM.currentUser}!",
                 color = PurpleButton,
             )
 
