@@ -69,7 +69,7 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             Button(
                 onClick = {
                     if(userVM.login(email, password)){
-                        navController.navigate("home")
+                        navController.navigate("home/${userVM.currentUser?.username}/${email}")
                     } else {
                         failed = true
                     }
@@ -84,6 +84,26 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
                     }
                     ) {
                 Text(text = "Register")
+            }
+
+            //debug Button: Später wieder entfernen nur das man direkt zum Home-Screen kommt
+            Button(
+                onClick = {
+                    navController.navigate("home/Filler/Filler@at")
+
+                }
+            ) {
+                Text(text = "debug: directly to Home")
+            }
+
+            //debug Button: Später wieder entfernen nur das man direkt zum ExampleDB kommt
+            Button(
+                onClick = {
+                    navController.navigate("exampledb")
+
+                }
+            ) {
+                Text(text = "debug: directly to Example db")
             }
 
         }
