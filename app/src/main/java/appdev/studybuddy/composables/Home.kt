@@ -42,6 +42,7 @@ import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
 import appdev.studybuddy.viewModels.HomeVM
 import appdev.studybuddy.viewModels.SessionVM
+import appdev.studybuddy.viewModels.UserVM
 
 
 @Composable
@@ -52,6 +53,7 @@ fun HomeScreen(navController: NavController,
 
     var displaySessionDialog by remember{ mutableStateOf(false) }
     var displayLogoutDialog by remember { mutableStateOf(false) }
+    val userVM: UserVM = hiltViewModel()
 
     if (displaySessionDialog){
         SessionSettingsDialog(
@@ -62,8 +64,14 @@ fun HomeScreen(navController: NavController,
 
     if (displayLogoutDialog){
         LogoutDialog(
-            onDismiss = {displayLogoutDialog = false},
-            onClick = {},
+            onDismiss = { displayLogoutDialog = false },
+            onClick = {
+                userVM.logout()                     // Benutzer abmelden
+                displayLogoutDialog = false        // Dialog schließen
+                navController.navigate("login") {  // Navigation zum Login
+                    popUpTo("home") { inclusive = true } // Zurück-Stack leeren
+                }
+            }
         )
     }
 
