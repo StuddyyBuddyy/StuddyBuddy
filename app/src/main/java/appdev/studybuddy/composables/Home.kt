@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
+import appdev.studybuddy.ui.theme.logOutRed
 import appdev.studybuddy.viewModels.HomeVM
 import appdev.studybuddy.viewModels.SessionVM
 import appdev.studybuddy.viewModels.UserVM
@@ -66,10 +67,10 @@ fun HomeScreen(navController: NavController,
         LogoutDialog(
             onDismiss = { displayLogoutDialog = false },
             onClick = {
-                userVM.logout()                     // Benutzer abmelden
-                displayLogoutDialog = false        // Dialog schließen
-                navController.navigate("login") {  // Navigation zum Login
-                    popUpTo("home") { inclusive = true } // Zurück-Stack leeren
+                userVM.logout()
+                displayLogoutDialog = false
+                navController.navigate("login") {
+                    popUpTo("home") { inclusive = true }
                 }
             }
         )
@@ -162,14 +163,18 @@ fun LogoutDialog(
             confirmButton = {
                 Button(
                     onClick = onClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    colors = ButtonDefaults.buttonColors(containerColor = logOutRed),
+                    shape = RoundedCornerShape(15.dp)
                 ) {
                     Text("Yes, Logout", color = Color.White)
                 }
             },
             dismissButton = {
-                OutlinedButton(onClick = onDismiss) {
-                    Text("No, Cancel")
+                OutlinedButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(15.dp))
+                {
+                    Text("No, Cancel", color = PurpleButton)
                 }
             },
             shape = RoundedCornerShape(12.dp)
