@@ -18,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimeInput
@@ -34,9 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import appdev.studybuddy.ui.theme.Purple40
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
 import appdev.studybuddy.viewModels.HomeVM
@@ -49,11 +50,19 @@ fun HomeScreen(navController: NavController,
                username: String,
                email: String){
 
-    var displayDialog by remember{ mutableStateOf(false) }
+    var displaySessionDialog by remember{ mutableStateOf(false) }
+    var displayLogoutDialog by remember { mutableStateOf(false) }
 
-    if (displayDialog){
+    if (displaySessionDialog){
         SessionSettingsDialog(
-            onDismiss = {displayDialog = false},
+            onDismiss = {displaySessionDialog = false},
+            onClick = {},
+        )
+    }
+
+    if (displayLogoutDialog){
+        LogoutDialog(
+            onDismiss = {displayLogoutDialog = false},
             onClick = {},
         )
     }
@@ -65,13 +74,31 @@ fun HomeScreen(navController: NavController,
             .background(PurpleBackground)
     ) {
 
+        Button(
+            onClick = {
+                displayLogoutDialog = true
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = PurpleButton,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(15.dp),
+            modifier = Modifier
+                .padding(15.dp)
+        ) {
+            Text(text = "Logout")
+        }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
 
-            Text(text = "Hello $username")
+            Text(
+                text = "Hello $username!",
+                color = PurpleButton,
+            )
 
             Spacer(modifier = Modifier.padding(10.dp))
 
@@ -84,14 +111,14 @@ fun HomeScreen(navController: NavController,
                         containerColor = PurpleButton,
                         contentColor = Color.White
                     ),
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(15.dp)
                 ) {
                     Text(text = "Start Session")
                 }
 
                 IconButton(
                     onClick = {
-                        displayDialog = true
+                        displaySessionDialog = true
                     }
                 ) {
                     Icon(
@@ -103,6 +130,42 @@ fun HomeScreen(navController: NavController,
             }
 
         }
+    }
+}
+
+@Composable
+fun LogoutDialog(
+    onDismiss: () -> Unit,
+    onClick: () -> Unit
+){
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(PurpleBackground)
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(text = "Logout")
+            },
+            text = {
+                Text(text = "Are you sure you want to logout?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = onClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Yes, Logout", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = onDismiss) {
+                    Text("No, Cancel")
+                }
+            },
+            shape = RoundedCornerShape(12.dp)
+        )
     }
 }
 
