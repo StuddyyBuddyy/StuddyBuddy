@@ -56,38 +56,31 @@ fun HomeScreen(
     navController: NavController,
     userVM: UserVM = hiltViewModel()
 ) {
+    StudyBuddyScaffold {
+        var displaySessionDialog by remember { mutableStateOf(false) }
+        var displayLogoutDialog by remember { mutableStateOf(false) }
 
-    var displaySessionDialog by remember { mutableStateOf(false) }
-    var displayLogoutDialog by remember { mutableStateOf(false) }
+        if (displaySessionDialog) {
+            SessionSettingsDialog(
+                onDismiss = { displaySessionDialog = false },
+                onClick = {},
+            )
+        }
 
-    if (displaySessionDialog) {
-        SessionSettingsDialog(
-            onDismiss = { displaySessionDialog = false },
-            onClick = {},
-        )
-    }
-
-    if (displayLogoutDialog) {
-        LogoutDialog(
-            onDismiss = { displayLogoutDialog = false },
-            onClick = {
-                Log.d("Logout", "Logout before ${userVM.currentUser}")
-                userVM.logout()
-                Log.d("Logout", "Logout after ${userVM.currentUser}")
-                displayLogoutDialog = false
-                navController.navigate("login") {
-                    popUpTo("home") { inclusive = true }
+        if (displayLogoutDialog) {
+            LogoutDialog(
+                onDismiss = { displayLogoutDialog = false },
+                onClick = {
+                    Log.d("Logout", "Logout before ${userVM.currentUser}")
+                    userVM.logout()
+                    Log.d("Logout", "Logout after ${userVM.currentUser}")
+                    displayLogoutDialog = false
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
+                    }
                 }
-            }
-        )
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PurpleBackground)
-    ) {
-
+            )
+        }
         Row(
             modifier = Modifier
                 .padding(top = 30.dp, start = 15.dp, end = 15.dp)
@@ -166,6 +159,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 /**
  * Dialog um den Logout zu bestätigen/ zu canceln

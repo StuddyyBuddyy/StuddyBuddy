@@ -33,11 +33,9 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
-    Scaffold { innerPadding ->
+    StudyBuddyScaffold {
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
