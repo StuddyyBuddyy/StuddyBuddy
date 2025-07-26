@@ -1,5 +1,6 @@
 package appdev.studybuddy.composables
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,10 +26,14 @@ import appdev.studybuddy.viewModels.UserVM
 
 @Composable
 fun LoginScreen(navController: NavController, userVM: UserVM){
+    if(userVM.autoLogin()) {
+        navController.navigate("home")
+    }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
+    Log.d("LoginScreen", "$email, $password")
     Scaffold { innerPadding ->
         Column (
             modifier = Modifier
@@ -43,7 +48,9 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             )
 
             Box(
-                modifier = Modifier.height(48.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .height(48.dp)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 if (failed) {
@@ -131,7 +138,9 @@ fun RegisterScreen(navController: NavController, userVM: UserVM){
             )
 
             Box(
-                modifier = Modifier.height(48.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .height(48.dp)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 if (failed) {

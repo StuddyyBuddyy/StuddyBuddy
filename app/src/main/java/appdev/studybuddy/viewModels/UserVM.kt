@@ -33,9 +33,11 @@ class UserVM @Inject constructor(
                 userPreferences.baseUsername,
                 userPreferences.basePassword
             ) { email, username, password ->
-                User(username, email, password)
+                if(email.isNotBlank() && password.isNotBlank() && username.isNotBlank()) {
+                    User(username, email, password)
+                }else null
             }.first().let { user ->
-                login(user.email, user.password)
+                currentUser = user
                 Log.d("Login", "Collected user: $user")
             }
         }
@@ -46,7 +48,6 @@ class UserVM @Inject constructor(
         Log.d("Login", "logging in as $email")
         val userNullable : User?
         runBlocking {
-            Log.d("Login", "fetching User")
             userNullable = dao.getUserByEmail(email)
         }
         Log.d("Login", "got User $User with passwd")
@@ -60,7 +61,7 @@ class UserVM @Inject constructor(
             currentUser = user
             Log.d("Login", "launch VMScope")
             viewModelScope.launch {
-                userPreferences.saveBaseEmail(email)
+                userPreferences.saveLastUser(user)
             }
             Log.d("Login", "successful")
             return true
@@ -78,13 +79,20 @@ class UserVM @Inject constructor(
         }
 
         if(success){
-            currentUser = user
+            success = login(user.email, user.password)
         }
 
         return success
     }
 
+    fun autoLogin(): Boolean {
+        return currentUser != null && login(currentUser!!.email, currentUser!!.password)
+    }
+
     fun logout(){
+        viewModelScope.launch {
+            userPreferences.clearLastUser()
+        }
         currentUser = null
     }
 }
