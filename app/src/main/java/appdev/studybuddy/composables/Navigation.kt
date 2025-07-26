@@ -2,7 +2,6 @@ package appdev.studybuddy.composables
 
 import LeaderboardScreen
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,31 +10,31 @@ import appdev.studybuddy.ExampleDBScreen
 import appdev.studybuddy.models.DAO
 import appdev.studybuddy.viewModels.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import appdev.studybuddy.models.User
 
 @Composable
-fun NavSetup(){
+fun NavSetup() {
     val navController = rememberNavController()
 
-    val dataVM : DataVM = viewModel()
+    val dataVM: DataVM = viewModel()
     // sessionVM : SessionVM = viewModel()
     val homeVM: HomeVM = viewModel()
-    val userVM : UserVM = hiltViewModel()
+    val userVM: UserVM = hiltViewModel()
+
+    val startDestination = if (userVM.autoLogin()) "home" else "login"
 
     NavHost(
         navController = navController,
-        startDestination = "login")
+        startDestination = startDestination
+    )
     {
-        composable("login"){
-            LoginScreen(navController, userVM)
+        composable("login") {
+            LoginScreen(navController)
         }
-        composable("register"){
-            RegisterScreen(navController, userVM)
+        composable("register") {
+            RegisterScreen(navController)
         }
         composable("home") {
-            HomeScreen(navController = navController,userVM)
+            HomeScreen(navController = navController)
         }
         composable("session") {
             SessionScreen(

@@ -10,7 +10,6 @@ import appdev.studybuddy.models.DAO
 import appdev.studybuddy.models.User
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -26,38 +25,32 @@ class UserVM @Inject constructor(
 
     init {
         viewModelScope.launch {
-            Log.d("Login", "Collecting user data")
-
             combine(
                 userPreferences.baseEmail,
                 userPreferences.baseUsername,
                 userPreferences.basePassword
             ) { email, username, password ->
-                if(email.isNotBlank() && password.isNotBlank() && username.isNotBlank()) {
+                if (email.isNotBlank() && password.isNotBlank() && username.isNotBlank()) {
                     User(username, email, password)
-                }else null
+                } else null
             }.first().let { user ->
                 currentUser = user
-                Log.d("Login", "Collected user: $user")
             }
         }
     }
 
 
-    fun login(email: String, password : String) : Boolean{
-        Log.d("Login", "logging in as $email")
-        val userNullable : User?
+    fun login(email: String, password: String): Boolean {
+        val userNullable: User?
         runBlocking {
             userNullable = dao.getUserByEmail(email)
         }
-        Log.d("Login", "got User $User with passwd")
-        if(userNullable == null){
-            Log.d("Login", "User is null")
+        if (userNullable == null) {
             return false
         }
-        val user : User = userNullable
+        val user: User = userNullable
 
-        if(user.password == password) {
+        if (user.password == password) {
             currentUser = user
             Log.d("Login", "launch VMScope")
             viewModelScope.launch {
@@ -65,20 +58,20 @@ class UserVM @Inject constructor(
             }
             Log.d("Login", "successful")
             return true
-        }else{
+        } else {
             Log.d("Login", "${user.password} != $password")
             return false
         }
     }
 
-    fun register(email: String, password: String, username : String): Boolean {
+    fun register(email: String, password: String, username: String): Boolean {
         val user = User(username, email, password)
-        var success : Boolean
+        var success: Boolean
         runBlocking {
             success = dao.insertUser(user)
         }
 
-        if(success){
+        if (success) {
             success = login(user.email, user.password)
         }
 
@@ -89,7 +82,7 @@ class UserVM @Inject constructor(
         return currentUser != null && login(currentUser!!.email, currentUser!!.password)
     }
 
-    fun logout(){
+    fun logout() {
         viewModelScope.launch {
             userPreferences.clearLastUser()
         }

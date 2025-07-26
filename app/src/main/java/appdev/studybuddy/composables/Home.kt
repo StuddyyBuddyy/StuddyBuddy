@@ -52,21 +52,22 @@ import appdev.studybuddy.viewModels.UserVM
 
 
 @Composable
-fun HomeScreen(navController: NavController,
-               userVM: UserVM,
-               ){
+fun HomeScreen(
+    navController: NavController,
+    userVM: UserVM = hiltViewModel()
+) {
 
-    var displaySessionDialog by remember{ mutableStateOf(false) }
+    var displaySessionDialog by remember { mutableStateOf(false) }
     var displayLogoutDialog by remember { mutableStateOf(false) }
 
-    if (displaySessionDialog){
+    if (displaySessionDialog) {
         SessionSettingsDialog(
-            onDismiss = {displaySessionDialog = false},
+            onDismiss = { displaySessionDialog = false },
             onClick = {},
         )
     }
 
-    if (displayLogoutDialog){
+    if (displayLogoutDialog) {
         LogoutDialog(
             onDismiss = { displayLogoutDialog = false },
             onClick = {
@@ -173,7 +174,7 @@ fun HomeScreen(navController: NavController,
 fun LogoutDialog(
     onDismiss: () -> Unit,
     onClick: () -> Unit
-){
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -198,7 +199,8 @@ fun LogoutDialog(
             dismissButton = {
                 OutlinedButton(
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(15.dp))
+                    shape = RoundedCornerShape(15.dp)
+                )
                 {
                     Text("No, Cancel", color = PurpleButton)
                 }
@@ -231,7 +233,10 @@ fun SessionSettingsDialog(
         is24Hour = true,
     )
 
-    LaunchedEffect(timeInputState.hour, timeInputState.minute) { //listen for changes in timeInputState
+    LaunchedEffect(
+        timeInputState.hour,
+        timeInputState.minute
+    ) { //listen for changes in timeInputState
         viewModel.setDuration(timeInputState.hour, timeInputState.minute)
     }
 
@@ -239,8 +244,10 @@ fun SessionSettingsDialog(
         onDismissRequest = onDismiss,
 
         title = {
-            Text(text = "Session Settings",
-                fontSize = 20.sp)
+            Text(
+                text = "Session Settings",
+                fontSize = 20.sp
+            )
         },
         text = {
             Column(
@@ -294,7 +301,7 @@ fun SessionSettingsDialog(
                         modifier = Modifier.weight(1f)
                     )
                     Switch(
-                        checked =useBrightnessSensor.value,
+                        checked = useBrightnessSensor.value,
                         onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
                     )
                 }
