@@ -52,41 +52,35 @@ import appdev.studybuddy.viewModels.UserVM
 
 
 @Composable
-fun HomeScreen(navController: NavController,
-               userVM: UserVM,
-               ){
+fun HomeScreen(
+    navController: NavController,
+    userVM: UserVM = hiltViewModel()
+) {
+    StudyBuddyScaffold {
+        var displaySessionDialog by remember { mutableStateOf(false) }
+        var displayLogoutDialog by remember { mutableStateOf(false) }
 
-    var displaySessionDialog by remember{ mutableStateOf(false) }
-    var displayLogoutDialog by remember { mutableStateOf(false) }
+        if (displaySessionDialog) {
+            SessionSettingsDialog(
+                onDismiss = { displaySessionDialog = false },
+                onClick = {},
+            )
+        }
 
-    if (displaySessionDialog){
-        SessionSettingsDialog(
-            onDismiss = {displaySessionDialog = false},
-            onClick = {},
-        )
-    }
-
-    if (displayLogoutDialog){
-        LogoutDialog(
-            onDismiss = { displayLogoutDialog = false },
-            onClick = {
-                Log.d("Logout", "Logout before ${userVM.currentUser}")
-                userVM.logout()
-                Log.d("Logout", "Logout after ${userVM.currentUser}")
-                displayLogoutDialog = false
-                navController.navigate("login") {
-                    popUpTo("home") { inclusive = true }
+        if (displayLogoutDialog) {
+            LogoutDialog(
+                onDismiss = { displayLogoutDialog = false },
+                onClick = {
+                    Log.d("Logout", "Logout before ${userVM.currentUser}")
+                    userVM.logout()
+                    Log.d("Logout", "Logout after ${userVM.currentUser}")
+                    displayLogoutDialog = false
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
+                    }
                 }
-            }
-        )
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PurpleBackground)
-    ) {
-
+            )
+        }
         Row(
             modifier = Modifier
                 .padding(top = 30.dp, start = 15.dp, end = 15.dp)
@@ -166,6 +160,7 @@ fun HomeScreen(navController: NavController,
     }
 }
 
+
 /**
  * Dialog um den Logout zu bestätigen/ zu canceln
  */
@@ -173,7 +168,7 @@ fun HomeScreen(navController: NavController,
 fun LogoutDialog(
     onDismiss: () -> Unit,
     onClick: () -> Unit
-){
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -198,7 +193,8 @@ fun LogoutDialog(
             dismissButton = {
                 OutlinedButton(
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(15.dp))
+                    shape = RoundedCornerShape(15.dp)
+                )
                 {
                     Text("No, Cancel", color = PurpleButton)
                 }
@@ -231,7 +227,10 @@ fun SessionSettingsDialog(
         is24Hour = true,
     )
 
-    LaunchedEffect(timeInputState.hour, timeInputState.minute) { //listen for changes in timeInputState
+    LaunchedEffect(
+        timeInputState.hour,
+        timeInputState.minute
+    ) { //listen for changes in timeInputState
         viewModel.setDuration(timeInputState.hour, timeInputState.minute)
     }
 
@@ -239,8 +238,10 @@ fun SessionSettingsDialog(
         onDismissRequest = onDismiss,
 
         title = {
-            Text(text = "Session Settings",
-                fontSize = 20.sp)
+            Text(
+                text = "Session Settings",
+                fontSize = 20.sp
+            )
         },
         text = {
             Column(
@@ -294,7 +295,7 @@ fun SessionSettingsDialog(
                         modifier = Modifier.weight(1f)
                     )
                     Switch(
-                        checked =useBrightnessSensor.value,
+                        checked = useBrightnessSensor.value,
                         onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
                     )
                 }

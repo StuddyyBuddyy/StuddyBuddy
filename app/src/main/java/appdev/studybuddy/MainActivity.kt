@@ -18,12 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             StudyBuddyTheme {
-                //Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -> }
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    NavSetup() // Your main navigation composable
-                }
+                NavSetup()
             }
         }
     }

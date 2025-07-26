@@ -32,64 +32,66 @@ import kotlinx.coroutines.delay
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun SessionScreen(navController: NavController,
-                  viewModel: SessionVM = hiltViewModel()
+fun SessionScreen(
+    navController: NavController,
+    viewModel: SessionVM = hiltViewModel()
 ){
+    StudyBuddyScaffold {
 
-    //todo move logic to viewmodel and make screen pretty
+        //todo move logic to viewmodel and make screen pretty
 
-    val durationMinutes = viewModel.duration.collectAsState().value
+        val durationMinutes = viewModel.duration.collectAsState().value
 
-    val totalDurationSeconds = durationMinutes * 60
+        val totalDurationSeconds = durationMinutes * 60
 
-    var elapsedSeconds by remember { mutableStateOf(0) }
+        var elapsedSeconds by remember { mutableStateOf(0) }
 
-    LaunchedEffect(Unit) {
-        while (elapsedSeconds < totalDurationSeconds) {
-            delay(1000)
-            elapsedSeconds++
-        }
-    }
-
-    val progress = elapsedSeconds / totalDurationSeconds.toFloat()
-    val remainingSeconds = totalDurationSeconds - elapsedSeconds
-    val minutesLeft = remainingSeconds / 60
-    val secondsLeft = remainingSeconds % 60
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier.padding(40.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-            progress = { 1f - progress },
-            modifier = Modifier.size(250.dp),
-            color = Color(0xFF000000),
-            strokeWidth = 12.dp,
-            trackColor = Color(0xFFD295DB),
-            strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-            )
-
-            Text(
-                text = String.format("%02d:%02d", minutesLeft, secondsLeft),
-                style = MaterialTheme.typography.headlineMedium
-            )
-        }
-
-        Spacer(modifier = Modifier.padding(10.dp))
-
-        Button(
-            onClick = {
-                navController.popBackStack() //todo end session
+        LaunchedEffect(Unit) {
+            while (elapsedSeconds < totalDurationSeconds) {
+                delay(1000)
+                elapsedSeconds++
             }
+        }
+
+        val progress = elapsedSeconds / totalDurationSeconds.toFloat()
+        val remainingSeconds = totalDurationSeconds - elapsedSeconds
+        val minutesLeft = remainingSeconds / 60
+        val secondsLeft = remainingSeconds % 60
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("End Session")
+            Box(
+                modifier = Modifier.padding(40.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    progress = { 1f - progress },
+                    modifier = Modifier.size(250.dp),
+                    color = Color(0xFF000000),
+                    strokeWidth = 12.dp,
+                    trackColor = Color(0xFFD295DB),
+                    strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+                )
+
+                Text(
+                    text = String.format("%02d:%02d", minutesLeft, secondsLeft),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
+
+            Spacer(modifier = Modifier.padding(10.dp))
+
+            Button(
+                onClick = {
+                    navController.popBackStack() //todo end session
+                }
+            ) {
+                Text("End Session")
+            }
         }
     }
-
 }

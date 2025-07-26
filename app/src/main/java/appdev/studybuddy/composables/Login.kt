@@ -20,20 +20,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.viewModels.UserVM
 
 @Composable
-fun LoginScreen(navController: NavController, userVM: UserVM){
+fun LoginScreen(
+    navController: NavController,
+    userVM: UserVM = hiltViewModel()
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
-    Scaffold { innerPadding ->
-        Column (
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+    StudyBuddyScaffold {
+        Column(
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -43,7 +45,9 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             )
 
             Box(
-                modifier = Modifier.height(48.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .height(48.dp)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 if (failed) {
@@ -54,7 +58,7 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("E-Mail Address")}
+                label = { Text("E-Mail Address") }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
@@ -62,14 +66,14 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = {Text("Password")}
+                label = { Text("Password") }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
                 onClick = {
-                    if(userVM.login(email, password)){
+                    if (userVM.login(email, password)) {
                         navController.navigate("home")
                     } else {
                         failed = true
@@ -80,10 +84,10 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
             }
 
             Button(
-                    onClick = {
-                        navController.navigate("register")
-                    }
-                    ) {
+                onClick = {
+                    navController.navigate("register")
+                }
+            ) {
                 Text(text = "Register")
             }
 
@@ -112,14 +116,17 @@ fun LoginScreen(navController: NavController, userVM: UserVM){
 }
 
 @Composable
-fun RegisterScreen(navController: NavController, userVM: UserVM){
+fun RegisterScreen(
+    navController: NavController,
+    userVM: UserVM = hiltViewModel()
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
     Scaffold { innerPadding ->
-        Column (
+        Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
@@ -131,7 +138,9 @@ fun RegisterScreen(navController: NavController, userVM: UserVM){
             )
 
             Box(
-                modifier = Modifier.height(48.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .height(48.dp)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 if (failed) {
@@ -142,7 +151,7 @@ fun RegisterScreen(navController: NavController, userVM: UserVM){
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("E-Mail Address")}
+                label = { Text("E-Mail Address") }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
@@ -150,7 +159,7 @@ fun RegisterScreen(navController: NavController, userVM: UserVM){
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username")}
+                label = { Text("Username") }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
@@ -158,14 +167,14 @@ fun RegisterScreen(navController: NavController, userVM: UserVM){
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = {Text("Password")}
+                label = { Text("Password") }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
                 onClick = {
-                    if(userVM.register(email, password, username)){
+                    if (userVM.register(email, password, username)) {
                         navController.navigate("home")
                     } else {
                         failed = true
