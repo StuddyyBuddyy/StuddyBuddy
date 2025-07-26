@@ -1,31 +1,71 @@
 package appdev.studybuddy.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewModelScope
 import appdev.studybuddy.models.DAO
 import appdev.studybuddy.models.User
+import appdev.studybuddy.persistency.UserPreferences
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import javax.inject.Inject
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class UserVM : ViewModel() {
+@HiltViewModel
+class UserVM @Inject constructor(
+    private val userPreferences: UserPreferences
+) : ViewModel() {
     val dao = DAO()
     var currentUser by mutableStateOf<User?>(null)
 
+    init {
+        viewModelScope.launch {
+            Log.d("Login", "Collecting user data")
+
+            combine(
+                userPreferences.baseEmail,
+                userPreferences.baseUsername,
+                userPreferences.basePassword
+            ) { email, username, password ->
+                User(username, email, password)
+            }.first().let { user ->
+                login(user.email, user.password)
+                Log.d("Login", "Collected user: $user")
+            }
+        }
+    }
+
+
     fun login(email: String, password : String) : Boolean{
+        Log.d("Login", "logging in as $email")
         val userNullable : User?
         runBlocking {
+            Log.d("Login", "fetching User")
             userNullable = dao.getUserByEmail(email)
         }
+        Log.d("Login", "got User $User with passwd")
         if(userNullable == null){
+            Log.d("Login", "User is null")
             return false
         }
         val user : User = userNullable
 
         if(user.password == password) {
             currentUser = user
+            Log.d("Login", "launch VMScope")
+            viewModelScope.launch {
+                userPreferences.saveBaseEmail(email)
+            }
+            Log.d("Login", "successful")
             return true
         }else{
+            Log.d("Login", "${user.password} != $password")
             return false
         }
     }
