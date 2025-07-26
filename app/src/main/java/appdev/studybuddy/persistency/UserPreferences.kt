@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import appdev.studybuddy.models.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -60,7 +61,15 @@ class UserPreferences (
         context.dataStore.edit { preferences -> preferences[LAST_USE_BRIGHTNESSSENSOR] = lastUseBrightnessSensor }
     }
 
+    suspend fun clearLastUser(){
+        saveBaseEmail("")
+        saveBaseUsername("")
+        saveBasePassword("")
+    }
 
-
-
+    suspend fun saveLastUser(user: User){
+        saveBaseEmail(user.email)
+        saveBaseUsername(user.username)
+        saveBasePassword(user.password)
+    }
 }
