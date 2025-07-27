@@ -28,13 +28,13 @@ fun NavSetup() {
     )
     {
         composable("login") {
-            LoginScreen(navController)
+            LoginScreen(navController, userVM = userVM)
         }
         composable("register") {
-            RegisterScreen(navController)
+            RegisterScreen(navController, userVM = userVM)
         }
         composable("home") {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController, userVM = userVM)
         }
         composable("session") {
             SessionScreen(
