@@ -13,21 +13,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
 
 @Composable
 fun LeaderboardScreen(navController: NavController){
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PurpleBackground)
-    ) {
-        Column() {
+    StudyBuddyScaffold {
+        Column {
             Row (
                 modifier = Modifier
                 .padding(top = 30.dp, start = 15.dp, end = 15.dp)
