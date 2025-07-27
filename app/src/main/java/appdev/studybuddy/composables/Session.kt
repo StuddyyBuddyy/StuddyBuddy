@@ -58,6 +58,11 @@ fun SessionScreen(
         val minutesLeft = remainingSeconds / 60
         val secondsLeft = remainingSeconds % 60
 
+        if (secondsLeft < 0){
+            navController.popBackStack() //TODO recap PopUp
+            viewModel.endSession(fail = false)
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize(),
@@ -87,7 +92,8 @@ fun SessionScreen(
 
             Button(
                 onClick = {
-                    navController.popBackStack() //todo end session
+                    navController.popBackStack() //TODO recap PopUp
+                    viewModel.endSession(fail = true)
                 }
             ) {
                 Text("End Session")
