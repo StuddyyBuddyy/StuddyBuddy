@@ -76,7 +76,7 @@ class SessionVM @Inject  constructor(
         viewModelScope.launch { userPreferences.saveLastSessionDuration(hours * 60 + minutes) }
     }
 
-    fun endSession(fail : Boolean){
+    fun endSession(fail : Boolean = false){
         val points = calculatePoints(fail)
         val session = createCompanionObject(points)
 
