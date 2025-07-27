@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import appdev.studybuddy.models.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -26,6 +27,7 @@ class UserPreferences (
     companion object{
         val BASE_EMAIL = stringPreferencesKey("base_email")
         val BASE_PASSWORD = stringPreferencesKey("base_password")
+        val BASE_USERNAME = stringPreferencesKey("base_username")
 
         val LAST_SESSION_DURATION = intPreferencesKey("last_session_duration")
         val LAST_USE_VIBRATIONSENSOR = booleanPreferencesKey("last_use_vibrationsensor")
@@ -35,6 +37,7 @@ class UserPreferences (
 
     val baseEmail: Flow<String> = context.dataStore.data.map { preferences -> preferences[BASE_EMAIL] ?: ""}
     val basePassword: Flow<String> = context.dataStore.data.map { preferences -> preferences[BASE_PASSWORD] ?: ""}
+    val baseUsername: Flow<String> = context.dataStore.data.map { preferences -> preferences[BASE_USERNAME] ?: ""}
 
     val lastSessionDuration: Flow<Int> = context.dataStore.data.map { preferences -> preferences[LAST_SESSION_DURATION] ?: 120}
     val lastUseVibrationSensor: Flow<Boolean> = context.dataStore.data.map { preferences -> preferences[LAST_USE_VIBRATIONSENSOR] ?: false}
@@ -43,6 +46,8 @@ class UserPreferences (
 
     suspend fun saveBaseEmail(email: String){ context.dataStore.edit { preferences -> preferences[BASE_EMAIL] = email } }
     suspend fun saveBasePassword(password: String){ context.dataStore.edit { preferences -> preferences[BASE_PASSWORD] = password } }
+    suspend fun saveBaseUsername(username: String){ context.dataStore.edit { preferences -> preferences[BASE_USERNAME] = username } }
+
 
     suspend fun saveLastSessionDuration(lastSessionDuration: Int){ context.dataStore.edit { preferences -> preferences[LAST_SESSION_DURATION] = lastSessionDuration } }
 
@@ -56,7 +61,15 @@ class UserPreferences (
         context.dataStore.edit { preferences -> preferences[LAST_USE_BRIGHTNESSSENSOR] = lastUseBrightnessSensor }
     }
 
+    suspend fun clearLastUser(){
+        saveBaseEmail("")
+        saveBaseUsername("")
+        saveBasePassword("")
+    }
 
-
-
+    suspend fun saveLastUser(user: User){
+        saveBaseEmail(user.email)
+        saveBaseUsername(user.username)
+        saveBasePassword(user.password)
+    }
 }
