@@ -40,14 +40,14 @@ fun SessionScreen(
 
         //todo move logic to viewmodel and make screen pretty
 
-        val durationMinutes = viewModel.duration.collectAsState().value
+        val durationMinutes = viewModel.sessionProperties.collectAsState()
 
-        val totalDurationSeconds = durationMinutes * 60
+        val totalDurationSeconds = durationMinutes.value!!.duration
 
         var elapsedSeconds by remember { mutableStateOf(0) }
 
         LaunchedEffect(Unit) {
-            while (elapsedSeconds < totalDurationSeconds) {
+            while (elapsedSeconds < totalDurationSeconds!!) {
                 delay(1000)
                 elapsedSeconds++
             }

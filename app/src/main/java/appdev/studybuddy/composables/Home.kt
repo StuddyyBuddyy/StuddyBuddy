@@ -217,20 +217,18 @@ fun SessionSettingsDialog(
     modifier: Modifier = Modifier,
     viewModel: SessionVM = hiltViewModel()
 ) {
-    var useMicrophoneSensor = viewModel.useMicrophoneSensor.collectAsState()
-    var useVibrationSensor = viewModel.useVibrationSensor.collectAsState()
-    var useBrightnessSensor = viewModel.useBrightnessSensor.collectAsState()
+    var sessionProperties = viewModel.sessionProperties.collectAsState().value
 
     val timeInputState = rememberTimePickerState(
-        initialHour = 0,
+        initialHour = 1,
         initialMinute = 5,
         is24Hour = true,
     )
 
     LaunchedEffect(
-        timeInputState.hour,
+        timeInputState.hour, //Changes von hour und minute in timerInputState checken
         timeInputState.minute
-    ) { //listen for changes in timeInputState
+    ) {
         viewModel.setDuration(timeInputState.hour, timeInputState.minute)
     }
 
@@ -265,7 +263,7 @@ fun SessionSettingsDialog(
                         modifier = Modifier.weight(1f)
                     )
                     Switch(
-                        checked = useMicrophoneSensor.value,
+                        checked = sessionProperties.useMicrophoneSensor,
                         onCheckedChange = { viewModel.setUseMicrophoneSensor(it) }
                     )
                 }
@@ -280,7 +278,7 @@ fun SessionSettingsDialog(
                         modifier = Modifier.weight(1f)
                     )
                     Switch(
-                        checked = useVibrationSensor.value,
+                        checked = sessionProperties.useVibrationSensor,
                         onCheckedChange = { viewModel.setUseVibrationSensor(it) }
                     )
                 }
@@ -295,7 +293,7 @@ fun SessionSettingsDialog(
                         modifier = Modifier.weight(1f)
                     )
                     Switch(
-                        checked = useBrightnessSensor.value,
+                        checked = sessionProperties.useBrightnessSensor,
                         onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
                     )
                 }
