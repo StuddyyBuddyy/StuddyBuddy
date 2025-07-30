@@ -9,6 +9,7 @@ import appdev.studybuddy.models.DAO
 import appdev.studybuddy.models.Session
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
+import kotlin.math.min
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
@@ -28,12 +30,23 @@ class SessionVM @Inject  constructor(
     private var _isInvalidBreak = MutableStateFlow<Boolean>(false)
     val isInvalidBreak: StateFlow<Boolean> = _isInvalidBreak
 
+    private var _elapsedSeconds = MutableStateFlow<Int>(0)
+    val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
+
+
     lateinit var user : User
     val dao = DAO()
 
     init {
         viewModelScope.launch {
             userPreferences.lastSessionProperties.collect { it -> _sessionProperties.value = it }
+        }
+    }
+
+    suspend fun startTimer(){
+        while (elapsedSeconds.value < sessionProperties.value.duration) {
+            delay(1000)
+            _elapsedSeconds.value++
         }
     }
 
@@ -53,6 +66,10 @@ class SessionVM @Inject  constructor(
         return (sessionProperties.value.durationBreak % 3600) / 60
     }
 
+    fun setElapsedSeconds(elapsedSeconds: Int){
+        _elapsedSeconds.value = elapsedSeconds
+    }
+
     fun setUseMicrophoneSensor(useMicrophoneSensor: Boolean){
         _sessionProperties.value = _sessionProperties.value.copy(useMicrophoneSensor = useMicrophoneSensor)
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
@@ -69,8 +86,13 @@ class SessionVM @Inject  constructor(
     }
 
     fun setDuration(hours: Int, minutes: Int){
-        _sessionProperties.value = _sessionProperties.value.copy(duration = (hours * 3600) + (minutes * 60))
-        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+        if((hours*3600+ minutes*60)<=sessionProperties.value.numBreaks*sessionProperties.value.durationBreak){
+            _isInvalidBreak.value = true
+        }else {
+            _isInvalidBreak.value = false
+            _sessionProperties.value = _sessionProperties.value.copy(duration = (hours * 3600) + (minutes * 60))
+            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+        }
     }
 
     fun setNumBreaks(numBreaks: Int){

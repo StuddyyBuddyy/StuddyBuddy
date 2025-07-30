@@ -46,24 +46,15 @@ fun SessionScreen(
         var showSuccessDialog by remember { mutableStateOf(false) }
         var showErrorToast by remember { mutableStateOf(false) }
 
-
-        //todo move logic to viewmodel and make screen pretty
-
-        val durationMinutes = viewModel.sessionProperties.collectAsState()
-
-        val totalDurationSeconds = durationMinutes.value!!.duration
-
-        var elapsedSeconds by remember { mutableStateOf(0) }
+        val sessionProperties by viewModel.sessionProperties.collectAsState()
+        val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
 
         LaunchedEffect(Unit) {
-            while (elapsedSeconds < totalDurationSeconds!!) {
-                delay(1000)
-                elapsedSeconds++
-            }
+            viewModel.startTimer()
         }
 
-        val progress = elapsedSeconds / totalDurationSeconds.toFloat()
-        val remainingSeconds = totalDurationSeconds - elapsedSeconds
+        val progress = elapsedSeconds / sessionProperties.duration.toFloat()
+        val remainingSeconds = sessionProperties.duration - elapsedSeconds
         val minutesLeft = remainingSeconds / 60
         val secondsLeft = remainingSeconds % 60
 

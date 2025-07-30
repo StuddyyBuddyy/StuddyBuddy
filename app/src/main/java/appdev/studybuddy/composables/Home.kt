@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
@@ -289,8 +290,12 @@ fun SessionSettingsDialog(
                                 modifier = Modifier.wrapContentWidth(),
                                 singleLine = true,
                                 value = sessionProperties.numBreaks.toString(),
-                                onValueChange = {
-                                    viewModel.setNumBreaks(it.toInt())
+                                onValueChange = { value ->
+                                    if(value.isEmpty()){
+                                        viewModel.setNumBreaks(0)
+                                    }else{
+                                        viewModel.setNumBreaks(value.toInt())
+                                    }
                                 },
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Number,
