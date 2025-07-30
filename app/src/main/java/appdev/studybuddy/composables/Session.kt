@@ -3,6 +3,7 @@ package appdev.studybuddy.composables
 
 import android.annotation.SuppressLint
 import android.view.View
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,6 +47,7 @@ fun SessionScreen(
 
         var showFailDialog by remember { mutableStateOf(false) }
         var showSuccessDialog by remember { mutableStateOf(false) }
+        var showErrorToast by remember { mutableStateOf(false) }
 
 
         //todo move logic to viewmodel and make screen pretty
@@ -109,9 +112,13 @@ fun SessionScreen(
         if (showFailDialog) {
             EndSessionDialogFail(
                 onConfirm = {
-                    viewModel.endSession(fail = true)
-                    navController.popBackStack()
-                    showFailDialog = false
+                    val successful = viewModel.endSession(fail = true)
+                    if (successful) {
+                        navController.popBackStack()
+                        showFailDialog = false
+                    } else {
+                        showErrorToast = true
+                    }
                 },
                 onDismiss = { showFailDialog = false }
             )
@@ -120,12 +127,21 @@ fun SessionScreen(
         if (showSuccessDialog) {
             EndSessionDialogSuccess(
                 onConfirm = {
-                    viewModel.endSession()
-                    navController.popBackStack()
-                    showSuccessDialog =false
+                    val successful = viewModel.endSession()
+                    if (successful) {
+                        navController.popBackStack()
+                        showSuccessDialog = false
+                    } else {
+                        showErrorToast = true
+                    }
                 },
                 onDismiss = {}
             )
+        }
+
+        if (showErrorToast) {
+            ErrorToast()
+            showErrorToast = false
         }
 
     }
@@ -171,3 +187,16 @@ fun EndSessionDialogSuccess(
         }
     )
 }
+
+@Composable
+fun ErrorToast() {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        Toast.makeText(
+            context,
+            "Something went wrong",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+}
+

@@ -76,7 +76,7 @@ class SessionVM @Inject  constructor(
         viewModelScope.launch { userPreferences.saveLastSessionDuration(hours * 60 + minutes) }
     }
 
-    fun endSession(fail : Boolean = false){
+    fun endSession(fail : Boolean = false) : Boolean{
         val points = calculatePoints(fail)
         val session = createCompanionObject(points)
 
@@ -85,7 +85,7 @@ class SessionVM @Inject  constructor(
             successful = dao.insertSession(session)
         }
 
-        //TODO Error Handling
+        return successful
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -96,11 +96,11 @@ class SessionVM @Inject  constructor(
         val current = formatter.format(date)
 
         return Session(
-                userEmail = user.email,
-                date = current,
-                duration = _duration.value,
-                points = points,
-            )
+            userEmail = user.email,
+            date = current,
+            duration = _duration.value,
+            points = points,
+        )
     }
 
     fun calculatePoints(fail: Boolean) : Int {
