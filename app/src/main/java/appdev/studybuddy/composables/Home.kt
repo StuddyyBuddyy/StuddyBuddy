@@ -1,9 +1,7 @@
 package appdev.studybuddy.composables
 
 import android.util.Log
-import android.widget.EditText
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -24,14 +21,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TimeInput
-import androidx.compose.material3.TimePickerColors
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -51,13 +46,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
-import appdev.studybuddy.models.SessionProperties
 import appdev.studybuddy.ui.theme.DarkGrey
 import appdev.studybuddy.ui.theme.OtherGrey
-import appdev.studybuddy.ui.theme.Pink
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
-import appdev.studybuddy.ui.theme.StudyBuddyTheme
 import appdev.studybuddy.ui.theme.logOutRed
 import appdev.studybuddy.viewModels.SessionVM
 import appdev.studybuddy.viewModels.UserVM
@@ -228,6 +220,7 @@ fun SessionSettingsDialog(
     viewModel: SessionVM = hiltViewModel()
 ) {
     val sessionProperties by viewModel.sessionProperties.collectAsState()
+    val isInvalidBreak by viewModel.isInvalidBreak.collectAsState()
 
     val durationTimerInput = rememberTimePickerState(
         initialHour = viewModel.getHours(),
@@ -286,7 +279,7 @@ fun SessionSettingsDialog(
                         state = breakDurationTimerInput
                     )
 
-                    SessionSettingsBox("Num Breaks"){
+                    SessionSettingsRow("Num Breaks"){
                         OutlinedTextField(
                             modifier = Modifier.weight(1f),
                             singleLine = true,
@@ -299,24 +292,34 @@ fun SessionSettingsDialog(
                                 imeAction = ImeAction.Next),
                         )
                     }
+
+                    if(isInvalidBreak){
+                        Text(
+                            text = "Break(s) cant be longer then session!",
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                    }
+
                 }
 
                 LabeledBox("Sensor Feedback:") {
-                    SessionSettingsBox("Allow Volume Feedback:") {
+                    SessionSettingsRow("Allow Volume Feedback:") {
                         Switch(
                             checked = sessionProperties.useMicrophoneSensor,
                             onCheckedChange = { viewModel.setUseMicrophoneSensor(it) }
                         )
                     }
 
-                    SessionSettingsBox("Allow Vibration Feedback:") {
+                    SessionSettingsRow("Allow Vibration Feedback:") {
                         Switch(
                             checked = sessionProperties.useVibrationSensor,
                             onCheckedChange = { viewModel.setUseVibrationSensor(it) }
                         )
                     }
 
-                    SessionSettingsBox("Allow Brightness Feedback:") {
+                    SessionSettingsRow("Allow Brightness Feedback:") {
                         Switch(
                             checked = sessionProperties.useBrightnessSensor,
                             onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
@@ -330,7 +333,11 @@ fun SessionSettingsDialog(
 
         dismissButton = {
             Button(
-                onClick = onDismiss
+               onClick = {
+                   if (!isInvalidBreak){
+                       onDismiss()
+                   }
+               }
             ) {
                 Text("Confirm")
             }
@@ -342,7 +349,9 @@ fun SessionSettingsDialog(
     )
 }
 
-
+/**
+ * Labeld Box to group Session Properties
+ */
 @Composable
 fun LabeledBox(
     labelText: String,
@@ -372,7 +381,7 @@ fun LabeledBox(
 }
 
 @Composable
-fun SessionSettingsBox(
+fun SessionSettingsRow(
     descriptionText: String,
     content: @Composable () -> Unit
 ){
