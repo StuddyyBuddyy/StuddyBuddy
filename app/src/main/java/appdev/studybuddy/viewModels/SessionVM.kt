@@ -104,8 +104,16 @@ class SessionVM @Inject  constructor(
     }
 
     fun calculatePoints(fail: Boolean) : Int {
-        //TODO implement
-        return 0
+        var points = _duration.value
+        if (fail)
+            return -points / 2
+
+        if (_useMicrophoneSensor.value) points += 5
+        if (_useVibrationSensor.value) points += 5
+        if (_useBrightnessSensor.value) points += 5
+
+
+        return points
     }
 
 }
