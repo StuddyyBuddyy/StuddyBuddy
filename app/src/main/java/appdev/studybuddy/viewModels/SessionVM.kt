@@ -1,16 +1,19 @@
 package appdev.studybuddy.viewModels
 
-import android.content.Context
-import androidx.compose.ui.platform.LocalContext
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import appdev.studybuddy.models.DAO
+import appdev.studybuddy.models.Session
+import appdev.studybuddy.models.User
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,6 +32,10 @@ class SessionVM @Inject  constructor(
 
     private var _duration = MutableStateFlow<Int>(120) //Duration in minutes
     val duration: StateFlow<Int> = _duration
+
+    lateinit var user : User
+
+    val dao = DAO()
 
     init {
         viewModelScope.launch {
@@ -63,6 +70,46 @@ class SessionVM @Inject  constructor(
     fun setDuration(hours: Int, minutes: Int){
         _duration.value = hours * 60 + minutes
         viewModelScope.launch { userPreferences.saveLastSessionDuration(hours * 60 + minutes) }
+    }
+
+    fun endSession(fail : Boolean = false) : Boolean{
+        val points = calculatePoints(fail)
+        val session = createCompanionObject(points)
+
+        var successful : Boolean
+        runBlocking{
+            successful = dao.insertSession(session)
+        }
+
+        return successful
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun createCompanionObject(points : Int) : Session {
+
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        val date = Date()
+        val current = formatter.format(date)
+
+        return Session(
+            userEmail = user.email,
+            date = current,
+            duration = _duration.value,
+            points = points,
+        )
+    }
+
+    fun calculatePoints(fail: Boolean) : Int {
+        var points = _duration.value
+        if (fail)
+            return -points / 2
+
+        if (_useMicrophoneSensor.value) points += 5
+        if (_useVibrationSensor.value) points += 5
+        if (_useBrightnessSensor.value) points += 5
+
+
+        return points
     }
 
 }

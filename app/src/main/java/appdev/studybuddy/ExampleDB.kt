@@ -110,7 +110,7 @@ fun ExampleDBScreen(dao: DAO) {
         if (sessions.isNotEmpty()) {
             Text("Sessions:")
             sessions.forEach {
-                Text("- ${it.date}: ${it.description} (${it.duration} mins, ${it.points} pts)")
+                Text("- ${it.date}: ${it.description} (${it.duration} mins, ${it.points} pts) id:${it.id}")
             }
         }
     }
