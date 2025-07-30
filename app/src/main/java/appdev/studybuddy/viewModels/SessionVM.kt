@@ -1,8 +1,6 @@
 package appdev.studybuddy.viewModels
 
 import android.annotation.SuppressLint
-import android.content.Context
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import appdev.studybuddy.models.DAO
@@ -10,8 +8,6 @@ import appdev.studybuddy.models.Session
 import appdev.studybuddy.models.User
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
