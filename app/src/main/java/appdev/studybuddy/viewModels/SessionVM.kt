@@ -1,23 +1,20 @@
 package appdev.studybuddy.viewModels
 
-import android.content.Context
-import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.ui.platform.LocalContext
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import appdev.studybuddy.models.SessionProperties
 import appdev.studybuddy.models.User
+import appdev.studybuddy.models.DAO
+import appdev.studybuddy.models.Session
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +27,9 @@ class SessionVM @Inject  constructor(
 
     private var _isInvalidBreak = MutableStateFlow<Boolean>(false)
     val isInvalidBreak: StateFlow<Boolean> = _isInvalidBreak
+
+    lateinit var user : User
+    val dao = DAO()
 
     init {
         viewModelScope.launch {
@@ -92,5 +92,44 @@ class SessionVM @Inject  constructor(
             viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
         }
     }
+    fun endSession(fail : Boolean = false) : Boolean{
+        val points = calculatePoints(fail)
+        val session = createCompanionObject(points)
+
+        var successful : Boolean
+        runBlocking{
+            successful = dao.insertSession(session)
+        }
+
+        return successful
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun createCompanionObject(points : Int) : Session {
+
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        val date = Date()
+        val current = formatter.format(date)
+
+        return Session(
+            userEmail = user.email,
+            date = current,
+            duration = sessionProperties.value.duration,
+            points = points,
+        )
+    }
+
+    fun calculatePoints(fail: Boolean) : Int {
+        var points = sessionProperties.value.duration
+        if (fail)
+            return -points / 2
+
+        if (sessionProperties.value.useMicrophoneSensor) points += 5
+        if (sessionProperties.value.useVibrationSensor) points += 5
+        if (sessionProperties.value.useBrightnessSensor) points += 5
+
+        return points
+    }
+
 }
 

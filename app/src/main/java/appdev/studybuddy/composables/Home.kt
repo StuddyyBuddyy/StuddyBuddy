@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -261,71 +264,75 @@ fun SessionSettingsDialog(
         },
 
         text = {
-            Column(
+            LazyColumn(
                 modifier = modifier
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
-                LabeledBox("Session Duration:") {
-                    TimeInput(
-                        state = durationTimerInput
-                    )
-                }
-
-                LabeledBox("Breaks:") {
-                    TimeInput(
-                        state = breakDurationTimerInput
-                    )
-
-                    SessionSettingsRow("Num Breaks"){
-                        OutlinedTextField(
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            value = sessionProperties.numBreaks.toString(),
-                            onValueChange = {
-                                viewModel.setNumBreaks(it.toInt())
-                            },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next),
-                        )
-                    }
-
-                    if(isInvalidBreak){
-                        Text(
-                            text = "Break(s) cant be longer then session!",
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                    }
-
-                }
-
-                LabeledBox("Sensor Feedback:") {
-                    SessionSettingsRow("Allow Volume Feedback:") {
-                        Switch(
-                            checked = sessionProperties.useMicrophoneSensor,
-                            onCheckedChange = { viewModel.setUseMicrophoneSensor(it) }
-                        )
-                    }
-
-                    SessionSettingsRow("Allow Vibration Feedback:") {
-                        Switch(
-                            checked = sessionProperties.useVibrationSensor,
-                            onCheckedChange = { viewModel.setUseVibrationSensor(it) }
-                        )
-                    }
-
-                    SessionSettingsRow("Allow Brightness Feedback:") {
-                        Switch(
-                            checked = sessionProperties.useBrightnessSensor,
-                            onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
+                item{
+                    LabeledBox("Session Duration:") {
+                        TimeInput(
+                            state = durationTimerInput
                         )
                     }
                 }
+
+                item {
+                    LabeledBox("Breaks:") {
+                        TimeInput(
+                            state = breakDurationTimerInput
+                        )
+
+                        SessionSettingsRow("Num Breaks"){
+                            OutlinedTextField(
+                                modifier = Modifier.wrapContentWidth(),
+                                singleLine = true,
+                                value = sessionProperties.numBreaks.toString(),
+                                onValueChange = {
+                                    viewModel.setNumBreaks(it.toInt())
+                                },
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Next),
+                            )
+                        }
+
+                        if(isInvalidBreak){
+                            Text(
+                                text = "Break(s) cant be longer then session!",
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    LabeledBox("Sensor Feedback:") {
+                        SessionSettingsRow("Allow Volume Feedback:") {
+                            Switch(
+                                checked = sessionProperties.useMicrophoneSensor,
+                                onCheckedChange = { viewModel.setUseMicrophoneSensor(it) }
+                            )
+                        }
+
+                        SessionSettingsRow("Allow Vibration Feedback:") {
+                            Switch(
+                                checked = sessionProperties.useVibrationSensor,
+                                onCheckedChange = { viewModel.setUseVibrationSensor(it) }
+                            )
+                        }
+
+                        SessionSettingsRow("Allow Brightness Feedback:") {
+                            Switch(
+                                checked = sessionProperties.useBrightnessSensor,
+                                onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
+                            )
+                        }
+                    }
+                }
+
             }
         },
 
@@ -395,6 +402,11 @@ fun SessionSettingsRow(
             modifier = Modifier.weight(1f)
         )
 
-        content()
+        Box(
+            modifier = Modifier.weight(1f)
+        ){
+            content()
+        }
+
     }
 }
