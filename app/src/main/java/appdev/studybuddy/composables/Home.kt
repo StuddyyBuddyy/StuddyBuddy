@@ -1,8 +1,9 @@
 package appdev.studybuddy.composables
 
 import android.util.Log
-import androidx.compose.foundation.Image
+import android.widget.EditText
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
@@ -21,10 +24,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePickerColors
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,16 +44,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
+import appdev.studybuddy.models.SessionProperties
+import appdev.studybuddy.ui.theme.DarkGrey
+import appdev.studybuddy.ui.theme.OtherGrey
+import appdev.studybuddy.ui.theme.Pink
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
+import appdev.studybuddy.ui.theme.StudyBuddyTheme
 import appdev.studybuddy.ui.theme.logOutRed
-import appdev.studybuddy.viewModels.HomeVM
 import appdev.studybuddy.viewModels.SessionVM
 import appdev.studybuddy.viewModels.UserVM
 
@@ -62,8 +74,7 @@ fun HomeScreen(
 
         if (displaySessionDialog) {
             SessionSettingsDialog(
-                onDismiss = { displaySessionDialog = false },
-                onClick = {},
+                onDismiss = { displaySessionDialog = false }
             )
         }
 
@@ -213,24 +224,37 @@ fun LogoutDialog(
 @Composable
 fun SessionSettingsDialog(
     onDismiss: () -> Unit,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SessionVM = hiltViewModel()
 ) {
-    var sessionProperties = viewModel.sessionProperties.collectAsState().value
+    val sessionProperties by viewModel.sessionProperties.collectAsState()
 
-    val timeInputState = rememberTimePickerState(
-        initialHour = 1,
-        initialMinute = 5,
+    val durationTimerInput = rememberTimePickerState(
+        initialHour = viewModel.getHours(),
+        initialMinute = viewModel.getMinutes(),
+        is24Hour = true,
+    )
+
+    val breakDurationTimerInput = rememberTimePickerState(
+        initialHour = viewModel.getBreakHours(),
+        initialMinute = viewModel.getBreakMinutes(),
         is24Hour = true,
     )
 
     LaunchedEffect(
-        timeInputState.hour, //Changes von hour und minute in timerInputState checken
-        timeInputState.minute
+        durationTimerInput.hour,
+        durationTimerInput.minute
     ) {
-        viewModel.setDuration(timeInputState.hour, timeInputState.minute)
+        viewModel.setDuration(durationTimerInput.hour, durationTimerInput.minute)
     }
+
+    LaunchedEffect(
+        breakDurationTimerInput.hour,
+        breakDurationTimerInput.minute
+    ) {
+        viewModel.setBreakDuration(breakDurationTimerInput.hour, breakDurationTimerInput.minute)
+    }
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -238,79 +262,130 @@ fun SessionSettingsDialog(
         title = {
             Text(
                 text = "Session Settings",
-                fontSize = 20.sp
+                fontSize = 20.sp,
+                color = Color.White
             )
         },
+
         text = {
             Column(
                 modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                TimeInput(
-                    state = timeInputState
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Allow Volume Feedback:",
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(
-                        checked = sessionProperties.useMicrophoneSensor,
-                        onCheckedChange = { viewModel.setUseMicrophoneSensor(it) }
+                LabeledBox("Session Duration:") {
+                    TimeInput(
+                        state = durationTimerInput
                     )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Allow Vibration Feedback:",
-                        modifier = Modifier.weight(1f)
+                LabeledBox("Breaks:") {
+                    TimeInput(
+                        state = breakDurationTimerInput
                     )
-                    Switch(
-                        checked = sessionProperties.useVibrationSensor,
-                        onCheckedChange = { viewModel.setUseVibrationSensor(it) }
-                    )
+
+                    SessionSettingsBox("Num Breaks"){
+                        OutlinedTextField(
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            value = sessionProperties.numBreaks.toString(),
+                            onValueChange = {
+                                viewModel.setNumBreaks(it.toInt())
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Next),
+                        )
+                    }
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Allow Brightness Feedback:",
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(
-                        checked = sessionProperties.useBrightnessSensor,
-                        onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
-                    )
+                LabeledBox("Sensor Feedback:") {
+                    SessionSettingsBox("Allow Volume Feedback:") {
+                        Switch(
+                            checked = sessionProperties.useMicrophoneSensor,
+                            onCheckedChange = { viewModel.setUseMicrophoneSensor(it) }
+                        )
+                    }
+
+                    SessionSettingsBox("Allow Vibration Feedback:") {
+                        Switch(
+                            checked = sessionProperties.useVibrationSensor,
+                            onCheckedChange = { viewModel.setUseVibrationSensor(it) }
+                        )
+                    }
+
+                    SessionSettingsBox("Allow Brightness Feedback:") {
+                        Switch(
+                            checked = sessionProperties.useBrightnessSensor,
+                            onCheckedChange = { viewModel.setUseBrightnessSensor(it) }
+                        )
+                    }
                 }
             }
         },
 
-        confirmButton = {
-        },
+        confirmButton = {},
 
         dismissButton = {
             Button(
                 onClick = onDismiss
             ) {
-                Text("Cancel")
+                Text("Confirm")
             }
         },
 
-        modifier = modifier
+        modifier = modifier,
+        containerColor = DarkGrey,
+        textContentColor = Color.White
     )
+}
+
+
+@Composable
+fun LabeledBox(
+    labelText: String,
+    content: @Composable () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+
+        Text(
+            text = labelText,
+            fontSize = 12.sp,
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.White
+        )
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                                .background(OtherGrey,shape = RoundedCornerShape(8.dp))
+                                .padding(8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            content()
+        }
+
+    }
+}
+
+@Composable
+fun SessionSettingsBox(
+    descriptionText: String,
+    content: @Composable () -> Unit
+){
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = descriptionText,
+            modifier = Modifier.weight(1f)
+        )
+
+        content()
+    }
 }

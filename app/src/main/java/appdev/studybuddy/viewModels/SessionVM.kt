@@ -1,6 +1,7 @@
 package appdev.studybuddy.viewModels
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
@@ -32,32 +33,48 @@ class SessionVM @Inject  constructor(
         }
     }
 
+    fun getHours(): Int{
+        return sessionProperties.value.duration / 3600
+    }
+
+    fun getMinutes(): Int{
+        return (sessionProperties.value.duration % 3600) / 60
+    }
+
+    fun getBreakHours(): Int{
+        return sessionProperties.value.durationBreak / 3600
+    }
+
+    fun getBreakMinutes(): Int{
+        return (sessionProperties.value.durationBreak % 3600) / 60
+    }
+
     fun setUseMicrophoneSensor(useMicrophoneSensor: Boolean){
-        _sessionProperties.value.useMicrophoneSensor = useMicrophoneSensor
+        _sessionProperties.value = _sessionProperties.value.copy(useMicrophoneSensor = useMicrophoneSensor)
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
     }
 
     fun setUseVibrationSensor(useVibrationSensor: Boolean){
-        _sessionProperties.value.useVibrationSensor = useVibrationSensor
+        _sessionProperties.value = _sessionProperties.value.copy(useVibrationSensor = useVibrationSensor)
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
     }
 
     fun setUseBrightnessSensor(useBrightnessSensor: Boolean){
-        _sessionProperties.value.useBrightnessSensor = useBrightnessSensor
+        _sessionProperties.value = _sessionProperties.value.copy(useBrightnessSensor = useBrightnessSensor)
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
     }
 
     fun setDuration(hours: Int, minutes: Int){
-        _sessionProperties.value.duration = hours * 3600 + minutes * 60
+        _sessionProperties.value = _sessionProperties.value.copy(duration = (hours * 3600) + (minutes * 60))
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
     }
 
     fun setNumBreaks(numBreaks: Int){
-        _sessionProperties.value.numBreaks = numBreaks
+        _sessionProperties.value = _sessionProperties.value.copy(numBreaks = numBreaks)
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
     }
     fun setBreakDuration(hours: Int, minutes: Int){
-        _sessionProperties.value.durationBreak = hours * 3600 + minutes * 60
+        _sessionProperties.value = _sessionProperties.value.copy(durationBreak = (hours * 3600) + (minutes * 60))
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
     }
 
