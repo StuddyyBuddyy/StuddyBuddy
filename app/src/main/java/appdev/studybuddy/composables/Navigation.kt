@@ -1,6 +1,8 @@
 package appdev.studybuddy.composables
 
 import LeaderboardScreen
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -41,6 +43,10 @@ fun NavSetup() {
                 navController = navController,
                 viewModel = sessionVM.apply { user = userVM.currentUser!! }
             )
+
+            BackHandler(true) {
+                Log.e("SESSION", "Tried to leave session screen with back-button")
+            }
         }
         composable("exampledb") {
             ExampleDBScreen(DAO())
