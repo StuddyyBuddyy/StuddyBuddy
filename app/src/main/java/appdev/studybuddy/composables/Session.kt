@@ -165,9 +165,6 @@ fun EndSessionDialogFail(
             }
         }
     }
-
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -176,16 +173,17 @@ fun EndSessionDialogSuccess(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Congratulations") },
-        text = { Text("You successfully ended a StudySession") },
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Return to Home")
+    DialogBox {
+        Column (modifier = Modifier.padding(16.dp)) {
+            Text("Congratulations")
+            Text("You successfully ended a StudySession")
+            Row {
+                Button(onClick = onConfirm) {
+                    Text("Confirm")
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
