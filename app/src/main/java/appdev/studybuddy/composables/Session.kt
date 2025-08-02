@@ -2,14 +2,18 @@ package appdev.studybuddy.composables
 
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,13 +30,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.viewModels.SessionVM
-import kotlinx.coroutines.delay
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -62,76 +67,80 @@ fun SessionScreen(
             showSuccessDialog = true
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier.padding(40.dp),
-                contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                CircularProgressIndicator(
-                    progress = { 1f - progress },
-                    modifier = Modifier.size(250.dp),
-                    color = Color(0xFF000000),
-                    strokeWidth = 12.dp,
-                    trackColor = Color(0xFFD295DB),
-                    strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-                )
+                Box(
+                    modifier = Modifier.padding(40.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        progress = { 1f - progress },
+                        modifier = Modifier.size(250.dp),
+                        color = Color(0xFF000000),
+                        strokeWidth = 12.dp,
+                        trackColor = Color(0xFFD295DB),
+                        strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+                    )
 
-                Text(
-                    text = String.format("%02d:%02d", minutesLeft, secondsLeft),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
-
-            Spacer(modifier = Modifier.padding(10.dp))
-
-            Button(
-                onClick = {
-                    showFailDialog = true
+                    Text(
+                        text = String.format("%02d:%02d", minutesLeft, secondsLeft),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                 }
-            ) {
-                Text("End Session")
+
+                Spacer(modifier = Modifier.padding(10.dp))
+
+                Button(
+                    onClick = {
+                        showFailDialog = true
+                    }
+                ) {
+                    Text("End Session")
+                }
+            }
+            if (showFailDialog) {
+                EndSessionDialogFail(
+                    onConfirm = {
+                        val successful = viewModel.endSession(fail = true)
+                        if (successful) {
+                            navController.popBackStack()
+                            showFailDialog = false
+                        } else {
+                            showErrorToast = true
+                        }
+                    },
+                    onDismiss = { showFailDialog = false }
+                )
+            }
+
+            if (showSuccessDialog) {
+                EndSessionDialogSuccess(
+                    onConfirm = {
+                        val successful = viewModel.endSession()
+                        if (successful) {
+                            navController.popBackStack()
+                            showSuccessDialog = false
+                        } else {
+                            showErrorToast = true
+                        }
+                    },
+                    onDismiss = {}
+                )
+            }
+
+            if (showErrorToast) {
+                ErrorToast()
+                showErrorToast = false
             }
         }
-        if (showFailDialog) {
-            EndSessionDialogFail(
-                onConfirm = {
-                    val successful = viewModel.endSession(fail = true)
-                    if (successful) {
-                        navController.popBackStack()
-                        showFailDialog = false
-                    } else {
-                        showErrorToast = true
-                    }
-                },
-                onDismiss = { showFailDialog = false }
-            )
-        }
-
-        if (showSuccessDialog) {
-            EndSessionDialogSuccess(
-                onConfirm = {
-                    val successful = viewModel.endSession()
-                    if (successful) {
-                        navController.popBackStack()
-                        showSuccessDialog = false
-                    } else {
-                        showErrorToast = true
-                    }
-                },
-                onDismiss = {}
-            )
-        }
-
-        if (showErrorToast) {
-            ErrorToast()
-            showErrorToast = false
-        }
-
     }
 }
 
@@ -141,21 +150,24 @@ fun EndSessionDialogFail(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("End Session?") },
-        text = { Text("Are you sure you want to end this session early?") },
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Yes")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("No")
+    DialogBox {
+        Column (modifier = Modifier.padding(16.dp)) {
+            Text("End Session?")
+            Text("Are you sure you want to end this session early?")
+            Row {
+                Button(onClick = onConfirm){
+                    Text("Confirm")
+                }
+
+                Button(onClick = onDismiss){
+                    Text("Cancel")
+                }
             }
         }
-    )
+    }
+
+
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -174,6 +186,21 @@ fun EndSessionDialogSuccess(
             }
         }
     )
+}
+
+@Composable
+fun DialogBox(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+){
+    Box(
+        modifier = modifier
+            .padding(48.dp)
+            .clip(shape = RoundedCornerShape(20.dp))
+            .background(color = PurpleBackground)
+    ){
+        content()
+    }
 }
 
 @Composable
