@@ -3,6 +3,7 @@ package appdev.studybuddy.composables
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +56,10 @@ fun SessionScreen(
 
         val imageUrl by viewModel.dogImageUrl.collectAsState()
         var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+        BackHandler {
+            showFailDialog = true
+        }
 
         LaunchedEffect(imageUrl) {
             imageUrl?.let {
@@ -145,7 +150,6 @@ fun SessionScreen(
                             showErrorToast = true
                         }
                     },
-                    onDismiss = {},
                     onDownload = {
                         imageBitmap?.let {
                             val success = viewModel.saveImageToGallery(
@@ -161,7 +165,7 @@ fun SessionScreen(
                             ).show()
                         }
                     },
-                    imageBitmap
+                    image = imageBitmap
                 )
             }
 
@@ -198,7 +202,6 @@ fun EndSessionDialogFail(
 @Composable
 fun EndSessionDialogSuccess(
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
     onDownload: () -> Unit,
     image : ImageBitmap?
 ) {
