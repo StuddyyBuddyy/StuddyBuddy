@@ -43,10 +43,6 @@ fun NavSetup() {
                 navController = navController,
                 viewModel = sessionVM.apply { user = userVM.currentUser!! }
             )
-
-            BackHandler(true) {
-                Log.e("SESSION", "Tried to leave session screen with back-button")
-            }
         }
         composable("exampledb") {
             ExampleDBScreen(DAO())
