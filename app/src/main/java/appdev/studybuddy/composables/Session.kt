@@ -144,7 +144,6 @@ fun SessionScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EndSessionDialogFail(
     onConfirm: () -> Unit,
@@ -167,7 +166,6 @@ fun EndSessionDialogFail(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EndSessionDialogSuccess(
     onConfirm: () -> Unit,

@@ -33,6 +33,8 @@ class SessionVM @Inject  constructor(
     private var _elapsedSeconds = MutableStateFlow<Int>(0)
     val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
 
+    var interrupt : Boolean = false
+
 
     lateinit var user : User
     val dao = DAO()
@@ -44,7 +46,8 @@ class SessionVM @Inject  constructor(
     }
 
     suspend fun startTimer(){
-        while (elapsedSeconds.value < sessionProperties.value.duration) {
+        interrupt = false
+        while (elapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
             _elapsedSeconds.value++
         }
@@ -121,6 +124,11 @@ class SessionVM @Inject  constructor(
         var successful : Boolean
         runBlocking{
             successful = dao.insertSession(session)
+        }
+
+        if (successful){
+            interrupt = true
+            _elapsedSeconds.value = 0
         }
 
         return successful
