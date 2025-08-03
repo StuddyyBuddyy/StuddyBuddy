@@ -19,7 +19,6 @@ import appdev.studybuddy.models.DogResponse
 import appdev.studybuddy.models.Session
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -32,11 +31,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
-import kotlin.math.min
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
