@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.viewModels.SessionVM
@@ -137,6 +138,8 @@ fun SessionScreen(
                 LaunchedEffect(Unit) {
                     viewModel.fetchDogImage()
                 }
+                val context = LocalContext.current
+
                 EndSessionDialogSuccess(
                     onConfirm = {
                         val successful = viewModel.endSession()
@@ -148,6 +151,21 @@ fun SessionScreen(
                         }
                     },
                     onDismiss = {},
+                    onDownload = {
+                        imageBitmap?.let {
+                            val success = viewModel.saveImageToGallery(
+                                context = context,
+                                image = it,
+                                fileName = "dog_${System.currentTimeMillis()}.jpg"
+                            )
+
+                            Toast.makeText(
+                                context,
+                                if (success) "Download successful" else "Download failed",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
                     imageBitmap
                 )
             }
@@ -186,6 +204,7 @@ fun EndSessionDialogFail(
 fun EndSessionDialogSuccess(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    onDownload: () -> Unit,
     image : ImageBitmap?
 ) {
     DialogBox {
@@ -204,6 +223,12 @@ fun EndSessionDialogSuccess(
             Row {
                 Button(onClick = onConfirm) {
                     Text("Confirm")
+                }
+
+                Spacer(modifier = Modifier.size(12.dp))
+                Button(onClick = onDownload
+                ) {
+                    Text("Download")
                 }
             }
         }
