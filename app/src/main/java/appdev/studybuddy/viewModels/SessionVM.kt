@@ -1,23 +1,40 @@
 package appdev.studybuddy.viewModels
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Environment
+import android.provider.MediaStore
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import appdev.studybuddy.BuildConfig
 import appdev.studybuddy.models.SessionProperties
 import appdev.studybuddy.models.User
 import appdev.studybuddy.models.DAO
+import appdev.studybuddy.models.DogResponse
 import appdev.studybuddy.models.Session
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readBytes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
-import kotlin.math.min
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
@@ -33,6 +50,8 @@ class SessionVM @Inject  constructor(
     private var _elapsedSeconds = MutableStateFlow<Int>(0)
     val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
 
+    var interrupt : Boolean = false
+
 
     lateinit var user : User
     val dao = DAO()
@@ -44,7 +63,8 @@ class SessionVM @Inject  constructor(
     }
 
     suspend fun startTimer(){
-        while (elapsedSeconds.value < sessionProperties.value.duration) {
+        interrupt = false
+        while (elapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
             _elapsedSeconds.value++
         }
@@ -123,6 +143,11 @@ class SessionVM @Inject  constructor(
             successful = dao.insertSession(session)
         }
 
+        if (successful){
+            interrupt = true
+            _elapsedSeconds.value = 0
+        }
+
         return successful
     }
 
@@ -151,6 +176,74 @@ class SessionVM @Inject  constructor(
         if (sessionProperties.value.useBrightnessSensor) points += 5
 
         return points
+    }
+
+    //-----------Dog API--------------
+    private val _dogImageUrl = MutableStateFlow<String?>(null)
+    val dogImageUrl : StateFlow<String?> = _dogImageUrl
+
+    val apiKey = BuildConfig.DOG_API_KEY
+
+
+    fun fetchDogImage() {
+        viewModelScope.launch {
+            try {
+                val response: DogResponse = dao.dogClient.get("https://dog.ceo/api/breeds/image/random") {
+                    headers {
+                        append("Authorization", "Bearer $apiKey")
+                    }
+                }.body()
+                _dogImageUrl.value = response.message
+            } catch (e: Exception) {
+                _dogImageUrl.value = null
+            }
+        }
+    }
+
+    suspend fun loadBitmapFromUrl(url: String): ImageBitmap? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response: HttpResponse = dao.dogClient.get(url)
+                val byteArray = response.readBytes()
+                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                bitmap?.asImageBitmap()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    fun saveImageToGallery(
+        context: Context,
+        image: ImageBitmap,
+        fileName: String
+    ): Boolean {
+        val bitmap: Bitmap = image.asAndroidBitmap()
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/DogImages")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            ?: return false
+
+        return try {
+            val success = resolver.openOutputStream(uri)?.use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            } ?: false
+
+            contentValues.clear()
+            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(uri, contentValues, null, null)
+
+            success
+        } catch (e: Exception) {
+            false
+        }
     }
 
 }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,12 +13,29 @@ android {
     namespace = "appdev.studybuddy"
     compileSdk = 36
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "appdev.studybuddy"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        val localProperties = Properties().apply {
+            val file = rootProject.file("local.properties")
+            if (file.exists()) {
+                load(file.inputStream())
+            }
+        }
+
+        val apiKey = localProperties.getProperty("DOG_API_KEY") ?: ""
+        val serverUrl = localProperties.getProperty("SERVER_URL") ?: ""
+
+        buildConfigField("String", "DOG_API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "SERVER_URL", "\"$serverUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

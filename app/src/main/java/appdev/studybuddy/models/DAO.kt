@@ -1,4 +1,5 @@
 package appdev.studybuddy.models
+import appdev.studybuddy.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -8,14 +9,17 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 class DAO {
+
+    //-------------DB-------------
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json()
         }
     }
-    val url = "http://appdev.eliasraunig.com"
+    val url = BuildConfig.SERVER_URL
 
     suspend fun getAllUsers(): List<User> {
         return try {
@@ -26,11 +30,19 @@ class DAO {
         }
     }
 
-    //TODO temporary, change to direct calling
     suspend fun getUserByEmail(email: String): User? {
-        val users = getAllUsers()
-        users.forEach{user -> if (user.email == email) return user}
-        return null
+        val user =
+            try {
+            client.get("$url/userByEmail") {
+                url {
+                    parameters.append("email", email)
+                }
+            }.body<User>()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+        return user
     }
 
     suspend fun getUserSessions(email: String): List<Session> {
@@ -73,4 +85,12 @@ class DAO {
             false
         }
     }
+
+    // ----------- Dog API --------------
+    val dogClient = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
 }
