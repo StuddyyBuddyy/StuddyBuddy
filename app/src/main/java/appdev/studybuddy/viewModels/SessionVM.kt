@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import appdev.studybuddy.BuildConfig
 import appdev.studybuddy.models.SessionProperties
 import appdev.studybuddy.models.User
 import appdev.studybuddy.models.DAO
@@ -181,7 +182,8 @@ class SessionVM @Inject  constructor(
     private val _dogImageUrl = MutableStateFlow<String?>(null)
     val dogImageUrl : StateFlow<String?> = _dogImageUrl
 
-    val apiKey = ""
+    val apiKey = BuildConfig.DOG_API_KEY
+
 
     fun fetchDogImage() {
         viewModelScope.launch {

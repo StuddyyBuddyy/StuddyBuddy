@@ -1,4 +1,5 @@
 package appdev.studybuddy.models
+import appdev.studybuddy.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -18,7 +19,7 @@ class DAO {
             json()
         }
     }
-    val url = "http://appdev.eliasraunig.com"
+    val url = BuildConfig.SERVER_URL
 
     suspend fun getAllUsers(): List<User> {
         return try {
