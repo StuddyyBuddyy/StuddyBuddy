@@ -1,19 +1,31 @@
 package appdev.studybuddy.viewModels
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import appdev.studybuddy.models.SessionProperties
 import appdev.studybuddy.models.User
 import appdev.studybuddy.models.DAO
+import appdev.studybuddy.models.DogResponse
 import appdev.studybuddy.models.Session
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readBytes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
@@ -161,5 +173,38 @@ class SessionVM @Inject  constructor(
         return points
     }
 
+    //-----------Dog API--------------
+    private val _dogImageUrl = MutableStateFlow<String?>(null)
+    val dogImageUrl : StateFlow<String?> = _dogImageUrl
+
+    val apiKey = ""
+
+    fun fetchDogImage() {
+        viewModelScope.launch {
+            try {
+                val response: DogResponse = dao.dogClient.get("https://dog.ceo/api/breeds/image/random") {
+                    headers {
+                        append("Authorization", "Bearer $apiKey")
+                    }
+                }.body()
+                _dogImageUrl.value = response.message
+            } catch (e: Exception) {
+                _dogImageUrl.value = null
+            }
+        }
+    }
+
+    suspend fun loadBitmapFromUrl(url: String): ImageBitmap? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response: HttpResponse = dao.dogClient.get(url)
+                val byteArray = response.readBytes()
+                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                bitmap?.asImageBitmap()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
 }
 

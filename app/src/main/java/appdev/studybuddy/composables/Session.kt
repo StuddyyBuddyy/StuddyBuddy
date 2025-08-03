@@ -3,7 +3,9 @@ package appdev.studybuddy.composables
 
 import android.annotation.SuppressLint
 import android.content.res.Resources
+import android.graphics.Picture
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +56,15 @@ fun SessionScreen(
 
         val sessionProperties by viewModel.sessionProperties.collectAsState()
         val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
+
+        val imageUrl by viewModel.dogImageUrl.collectAsState()
+        var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+        LaunchedEffect(imageUrl) {
+            imageUrl?.let {
+                imageBitmap = viewModel.loadBitmapFromUrl(it)
+            }
+        }
 
         LaunchedEffect(Unit) {
             viewModel.startTimer()
@@ -122,6 +134,9 @@ fun SessionScreen(
             }
 
             if (showSuccessDialog) {
+                LaunchedEffect(Unit) {
+                    viewModel.fetchDogImage()
+                }
                 EndSessionDialogSuccess(
                     onConfirm = {
                         val successful = viewModel.endSession()
@@ -132,7 +147,8 @@ fun SessionScreen(
                             showErrorToast = true
                         }
                     },
-                    onDismiss = {}
+                    onDismiss = {},
+                    imageBitmap
                 )
             }
 
@@ -169,12 +185,22 @@ fun EndSessionDialogFail(
 @Composable
 fun EndSessionDialogSuccess(
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    image : ImageBitmap?
 ) {
     DialogBox {
         Column (modifier = Modifier.padding(16.dp)) {
-            Text("Congratulations")
-            Text("You successfully ended a StudySession")
+            Text("Congratulations!")
+            Text("Here is a cute Dog Picture for you!")
+            if (image != null) {
+                Image(
+                    bitmap = image,
+                    contentDescription = "Random Dog",
+                    modifier = Modifier.size(300.dp)
+                )
+            } else {
+                Text("Loading...")
+            }
             Row {
                 Button(onClick = onConfirm) {
                     Text("Confirm")

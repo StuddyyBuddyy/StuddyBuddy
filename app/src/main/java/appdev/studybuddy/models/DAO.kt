@@ -8,8 +8,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 class DAO {
+
+    //-------------DB-------------
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json()
@@ -73,4 +76,12 @@ class DAO {
             false
         }
     }
+
+    // ----------- Dog API --------------
+    val dogClient = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
 }
