@@ -53,6 +53,7 @@ fun SessionScreen(
 
         val sessionProperties by viewModel.sessionProperties.collectAsState()
         val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
+        val isBreak by viewModel.isBreak.collectAsState()
 
         val imageUrl by viewModel.dogImageUrl.collectAsState()
         var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -90,6 +91,13 @@ fun SessionScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
+                if(isBreak){
+                    Text(
+                        text = String.format("Break starts in: ", isBreak),
+                    )
+                }
+
                 Box(
                     modifier = Modifier.padding(40.dp),
                     contentAlignment = Alignment.Center
@@ -99,15 +107,24 @@ fun SessionScreen(
                         modifier = Modifier.size(250.dp),
                         color = Color(0xFF000000),
                         strokeWidth = 12.dp,
-                        trackColor = Color(0xFFD295DB),
+                        trackColor = if(!isBreak) Color.Green else Color.Red,
                         strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
                     )
 
                     Text(
                         text = String.format("%02d:%02d", minutesLeft, secondsLeft),
+                        color = if(!isBreak) Color.Green else Color.Red,
                         style = MaterialTheme.typography.headlineMedium
                     )
+
                 }
+
+                if(isBreak){
+                    Text(
+                        text = String.format("Take a break! XXX todo ", isBreak),
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.padding(10.dp))
 

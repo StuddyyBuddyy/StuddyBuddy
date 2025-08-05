@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -50,10 +51,6 @@ class SessionVM @Inject  constructor(
     private var _elapsedSeconds = MutableStateFlow<Int>(0)
     val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
 
-    var efficientTime = sessionProperties.value.duration/(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak)
-    var sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
-    var sessionTimeCounter = 0
-
     private var _isBreak = MutableStateFlow<Boolean>(false)
     val isBreak: StateFlow<Boolean> = _isBreak
 
@@ -71,19 +68,33 @@ class SessionVM @Inject  constructor(
     suspend fun startTimer(){
         interrupt = false
 
+        var efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak)
+                            else sessionProperties.value.duration
+        var sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
+
+        var sessionTimeCounter = 0
+        var breakTimeCounter = 0
+
         while (elapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
             _elapsedSeconds.value++
 
-            if(!isBreak.value){
+            if (!_isBreak.value) { //keine Pause
                 sessionTimeCounter++
-            }else{
-                sessionTimeCounter = 0
-            }
 
-            if(sessionTimeCounter>sessionTimeSegment){
-                sessionTimeCounter = 0
-                
+                if (sessionTimeCounter >= sessionTimeSegment) {
+                    _isBreak.value = true
+                    sessionTimeCounter = 0
+                }
+            } else { //in einer Pause
+                breakTimeCounter++
+
+                //todo maybe sensor usage disablen während Pause?
+
+                if (breakTimeCounter >= sessionProperties.value.durationBreak) {
+                    _isBreak.value = false
+                    breakTimeCounter = 0
+                }
             }
 
         }
