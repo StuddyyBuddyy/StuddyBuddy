@@ -54,6 +54,7 @@ fun SessionScreen(
         val sessionProperties by viewModel.sessionProperties.collectAsState()
         val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
         val isBreak by viewModel.isBreak.collectAsState()
+        val breakNotifier by viewModel.breakNotifier.collectAsState()
 
         val imageUrl by viewModel.dogImageUrl.collectAsState()
         var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -92,9 +93,10 @@ fun SessionScreen(
                 verticalArrangement = Arrangement.Center
             ) {
 
-                if(isBreak){
+                if(breakNotifier>0){
                     Text(
-                        text = String.format("Break starts in: ", isBreak),
+                        text = String.format("Break starts in: %d ", breakNotifier),
+                        color = Color.Red,
                     )
                 }
 
@@ -122,6 +124,7 @@ fun SessionScreen(
                 if(isBreak){
                     Text(
                         text = String.format("Take a break! XXX todo ", isBreak),
+                        color = Color.Red,
                     )
                 }
 

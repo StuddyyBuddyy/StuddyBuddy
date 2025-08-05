@@ -1,6 +1,7 @@
 package appdev.studybuddy.viewModels
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -42,6 +43,8 @@ class SessionVM @Inject  constructor(
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
+    private val MIN_NOTIFICATION_TIME = 5
+
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
 
@@ -53,6 +56,9 @@ class SessionVM @Inject  constructor(
 
     private var _isBreak = MutableStateFlow<Boolean>(false)
     val isBreak: StateFlow<Boolean> = _isBreak
+
+    private var _breakNotifier = MutableStateFlow<Int>(0)
+    val breakNotifier : StateFlow<Int> = _breakNotifier
 
     var interrupt : Boolean = false
 
@@ -72,6 +78,7 @@ class SessionVM @Inject  constructor(
                             else sessionProperties.value.duration
         var sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
 
+        _isBreak.value = false
         var sessionTimeCounter = 0
         var breakTimeCounter = 0
 
@@ -82,10 +89,15 @@ class SessionVM @Inject  constructor(
             if (!_isBreak.value) { //keine Pause
                 sessionTimeCounter++
 
+                if(sessionTimeCounter>=sessionTimeSegment-MIN_NOTIFICATION_TIME && elapsedSeconds.value < sessionProperties.value.duration-MIN_NOTIFICATION_TIME){
+                    _breakNotifier.value = sessionTimeSegment-sessionTimeCounter
+                }
+
                 if (sessionTimeCounter >= sessionTimeSegment) {
                     _isBreak.value = true
                     sessionTimeCounter = 0
                 }
+
             } else { //in einer Pause
                 breakTimeCounter++
 
