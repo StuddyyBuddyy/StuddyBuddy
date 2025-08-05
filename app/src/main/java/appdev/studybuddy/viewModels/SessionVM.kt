@@ -1,12 +1,14 @@
 package appdev.studybuddy.viewModels
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -41,17 +43,24 @@ class SessionVM @Inject  constructor(
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
+    private val MIN_NOTIFICATION_TIME = 5
+
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
 
-    private var _isInvalidBreak = MutableStateFlow<Boolean>(false)
+    private var _isInvalidBreak = MutableStateFlow<Boolean>(false) //Indikator ob Pausen valid sind im Verhältnis zur Session-Dauer
     val isInvalidBreak: StateFlow<Boolean> = _isInvalidBreak
 
     private var _elapsedSeconds = MutableStateFlow<Int>(0)
     val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
 
-    var interrupt : Boolean = false
+    private var _isBreak = MutableStateFlow<Boolean>(false)
+    val isBreak: StateFlow<Boolean> = _isBreak
 
+    private var _breakNotifier = MutableStateFlow<Int>(0)
+    val breakNotifier : StateFlow<Int> = _breakNotifier
+
+    var interrupt : Boolean = false
 
     lateinit var user : User
     val dao = DAO()
@@ -64,9 +73,42 @@ class SessionVM @Inject  constructor(
 
     suspend fun startTimer(){
         interrupt = false
+
+        var efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak)
+                            else sessionProperties.value.duration
+        var sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
+
+        _isBreak.value = false
+        var sessionTimeCounter = 0
+        var breakTimeCounter = 0
+
         while (elapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
             _elapsedSeconds.value++
+
+            if (!_isBreak.value) { //keine Pause
+                sessionTimeCounter++
+
+                if(sessionTimeCounter>=sessionTimeSegment-MIN_NOTIFICATION_TIME && elapsedSeconds.value < sessionProperties.value.duration-MIN_NOTIFICATION_TIME){
+                    _breakNotifier.value = sessionTimeSegment-sessionTimeCounter
+                }
+
+                if (sessionTimeCounter >= sessionTimeSegment) {
+                    _isBreak.value = true
+                    sessionTimeCounter = 0
+                }
+
+            } else { //in einer Pause
+                breakTimeCounter++
+
+                //todo maybe sensor usage disablen während Pause?
+
+                if (breakTimeCounter >= sessionProperties.value.durationBreak) {
+                    _isBreak.value = false
+                    breakTimeCounter = 0
+                }
+            }
+
         }
     }
 
@@ -106,7 +148,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setDuration(hours: Int, minutes: Int){
-        if((hours*3600+ minutes*60)<=sessionProperties.value.numBreaks*sessionProperties.value.durationBreak){
+        if((hours*3600+ minutes*60)/2<=sessionProperties.value.numBreaks*sessionProperties.value.durationBreak){
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
@@ -116,7 +158,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setNumBreaks(numBreaks: Int){
-        if(sessionProperties.value.duration<=numBreaks*sessionProperties.value.durationBreak){
+        if(sessionProperties.value.duration/2<=numBreaks*sessionProperties.value.durationBreak){
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
@@ -126,7 +168,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setBreakDuration(hours: Int, minutes: Int) {
-        if (sessionProperties.value.duration <= sessionProperties.value.numBreaks*(hours * 3600 + minutes * 60)) {
+        if (sessionProperties.value.duration/2 <= sessionProperties.value.numBreaks*(hours * 3600 + minutes * 60)) {
             _isInvalidBreak.value = true
         } else {
             _isInvalidBreak.value = false
@@ -134,6 +176,7 @@ class SessionVM @Inject  constructor(
             viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
         }
     }
+
     fun endSession(fail : Boolean = false) : Boolean{
         val points = calculatePoints(fail)
         val session = createCompanionObject(points)
