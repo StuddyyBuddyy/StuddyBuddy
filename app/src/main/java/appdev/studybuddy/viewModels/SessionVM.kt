@@ -44,14 +44,20 @@ class SessionVM @Inject  constructor(
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
 
-    private var _isInvalidBreak = MutableStateFlow<Boolean>(false)
+    private var _isInvalidBreak = MutableStateFlow<Boolean>(false) //Indikator ob Pausen valid sind im Verhältnis zur Session-Dauer
     val isInvalidBreak: StateFlow<Boolean> = _isInvalidBreak
 
     private var _elapsedSeconds = MutableStateFlow<Int>(0)
     val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
 
-    var interrupt : Boolean = false
+    var efficientTime = sessionProperties.value.duration/(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak)
+    var sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
+    var sessionTimeCounter = 0
 
+    private var _isBreak = MutableStateFlow<Boolean>(false)
+    val isBreak: StateFlow<Boolean> = _isBreak
+
+    var interrupt : Boolean = false
 
     lateinit var user : User
     val dao = DAO()
@@ -64,9 +70,22 @@ class SessionVM @Inject  constructor(
 
     suspend fun startTimer(){
         interrupt = false
+
         while (elapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
             _elapsedSeconds.value++
+
+            if(!isBreak.value){
+                sessionTimeCounter++
+            }else{
+                sessionTimeCounter = 0
+            }
+
+            if(sessionTimeCounter>sessionTimeSegment){
+                sessionTimeCounter = 0
+                
+            }
+
         }
     }
 
@@ -106,7 +125,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setDuration(hours: Int, minutes: Int){
-        if((hours*3600+ minutes*60)<=sessionProperties.value.numBreaks*sessionProperties.value.durationBreak){
+        if((hours*3600+ minutes*60)/2<=sessionProperties.value.numBreaks*sessionProperties.value.durationBreak){
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
@@ -116,7 +135,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setNumBreaks(numBreaks: Int){
-        if(sessionProperties.value.duration<=numBreaks*sessionProperties.value.durationBreak){
+        if(sessionProperties.value.duration/2<=numBreaks*sessionProperties.value.durationBreak){
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
@@ -126,7 +145,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setBreakDuration(hours: Int, minutes: Int) {
-        if (sessionProperties.value.duration <= sessionProperties.value.numBreaks*(hours * 3600 + minutes * 60)) {
+        if (sessionProperties.value.duration/2 <= sessionProperties.value.numBreaks*(hours * 3600 + minutes * 60)) {
             _isInvalidBreak.value = true
         } else {
             _isInvalidBreak.value = false
@@ -134,6 +153,7 @@ class SessionVM @Inject  constructor(
             viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
         }
     }
+
     fun endSession(fail : Boolean = false) : Boolean{
         val points = calculatePoints(fail)
         val session = createCompanionObject(points)

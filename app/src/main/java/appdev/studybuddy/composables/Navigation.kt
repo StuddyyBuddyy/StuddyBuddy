@@ -1,8 +1,6 @@
 package appdev.studybuddy.composables
 
 import LeaderboardScreen
-import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -12,6 +10,7 @@ import appdev.studybuddy.ExampleDBScreen
 import appdev.studybuddy.models.DAO
 import appdev.studybuddy.viewModels.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import appdev.studybuddy.composables.home.HomeScreen
 
 @Composable
 fun NavSetup() {
@@ -30,13 +29,13 @@ fun NavSetup() {
     )
     {
         composable("login") {
-            LoginScreen(navController, userVM = userVM)
+            LoginScreen(navController = navController)
         }
         composable("register") {
-            RegisterScreen(navController, userVM = userVM)
+            RegisterScreen(navController = navController)
         }
         composable("home") {
-            HomeScreen(navController = navController, userVM = userVM)
+            HomeScreen(navController = navController)
         }
         composable("session") {
             SessionScreen(
@@ -49,9 +48,7 @@ fun NavSetup() {
         }
 
         composable("leaderboard") {
-            LeaderboardScreen(
-                navController = navController
-            )
+            LeaderboardScreen(navController = navController)
         }
 
     }

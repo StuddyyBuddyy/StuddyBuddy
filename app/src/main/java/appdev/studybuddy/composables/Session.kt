@@ -119,6 +119,7 @@ fun SessionScreen(
                     Text("End Session")
                 }
             }
+
             if (showFailDialog) {
                 EndSessionDialogFail(
                     onConfirm = {

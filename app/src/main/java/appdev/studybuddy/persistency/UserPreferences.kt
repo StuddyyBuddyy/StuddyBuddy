@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "preferences")
 
 /**
- * PreferenceDataStore to store last user login data or last session properties
+ * PreferenceDataStore um die letzten User-Login-Daten und Session-Properties zu speichern.
  */
 class UserPreferences (
     private val context: Context
