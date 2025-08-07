@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,6 +72,13 @@ fun SessionScreen(
 
         LaunchedEffect(Unit) {
             viewModel.startTimer()
+        }
+
+        DisposableEffect(viewModel) {
+            viewModel.onResume()
+            onDispose {
+                viewModel.onPause()
+            }
         }
 
         val progress = elapsedSeconds / sessionProperties.duration.toFloat()

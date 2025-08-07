@@ -1,7 +1,6 @@
 package appdev.studybuddy.viewModels
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -62,6 +61,15 @@ class SessionVM @Inject  constructor(
     private var _breakNotifier = MutableStateFlow<Int>(0)
     val breakNotifier : StateFlow<Int> = _breakNotifier
 
+    private var _lightLevel = MutableStateFlow<Double>(0.0)
+    val lightLevel : StateFlow<Double> = _lightLevel
+
+    private var _soundLevel = MutableStateFlow<Int?>(0)
+    val soundLevel : StateFlow<Int?> = _soundLevel
+
+    private var _vibrationLevel = MutableStateFlow<Int>(0)
+    val vibrationLevel : StateFlow<Int> = _vibrationLevel
+
     var interrupt : Boolean = false
 
     lateinit var user : User
@@ -71,7 +79,6 @@ class SessionVM @Inject  constructor(
         viewModelScope.launch {
             userPreferences.lastSessionProperties.collect { it -> _sessionProperties.value = it }
         }
-
     }
 
     /**
@@ -232,6 +239,27 @@ class SessionVM @Inject  constructor(
         } catch (e: Exception) {
             false
         }
+    }
+
+    //-----------Sensors --------------
+    fun onResume(){
+        if(sessionProperties.value.useBrightnessSensor){ sensorRepository.registerBrightnessSensor() }
+
+        if(sessionProperties.value.useMicrophoneSensor){
+            sensorRepository.registerSoundSensor()
+            viewModelScope.launch {
+                while(true){
+                    delay(1000)
+                    _soundLevel.value = sensorRepository.getAmplitude()
+                    Log.d("SENSOR","Sound: ${_soundLevel.value}")
+                }
+            }
+        }
+    }
+
+    fun onPause(){
+        sensorRepository.unregisterBrightnessSensor()
+        sensorRepository.unregisterSoundSensor()
     }
 
     //-----------Getter & Setter --------------

@@ -17,6 +17,7 @@ lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
 composeBom = "2025.07.00"
 lifecycleViewmodelCompose = "2.9.2"
+mlSpeechSemanticsSounddectSdkVersion = "2.1.0.300"
 navigationCompose = "2.9.2"
 androidx-hilt-compiler = "1.2.0"
 
@@ -31,6 +32,7 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
+hms-ml-speech-semantics-sounddect-sdk = { module = "com.huawei.hms:ml-speech-semantics-sounddect-sdk", version.ref = "mlSpeechSemanticsSounddectSdkVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -50,6 +52,7 @@ ktor-client-content-negotiation-v235 = { module = "io.ktor:ktor-client-content-n
 ktor-client-core-v235 = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCoreVersion" }
 ktor-serialization-kotlinx-json-v235 = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJsonVersion" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidx-hilt-compiler" }
+ml-speech-semantics-sounddect-model = { module = "com.huawei.hms:ml-speech-semantics-sounddect-model", version.ref = "mlSpeechSemanticsSounddectSdkVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
