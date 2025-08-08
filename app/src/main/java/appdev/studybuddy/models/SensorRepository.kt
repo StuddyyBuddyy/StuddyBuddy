@@ -36,6 +36,7 @@ class SensorRepository(
     init {
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         brightnessSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        vibrationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
 
     suspend fun recordSound(){
@@ -72,6 +73,12 @@ class SensorRepository(
         }
     }
 
+    fun registerVibrationSensor() {
+        vibrationSensor?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+    }
+
     fun unregisterSoundSensor() {
         microphoneSensor?.apply {
             stop()
@@ -85,10 +92,19 @@ class SensorRepository(
         sensorManager.unregisterListener(this)
     }
 
+    fun unregisterVibrationSensor() {
+        sensorManager.unregisterListener(this)
+    }
+
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_LIGHT) { //Brightness Sensor Event
 
             Log.d("SENSOR","Light: ${event.values[0]}")
+        }
+
+        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) { //Vibration Sensor Event
+
+            Log.d("SENSOR","Vibration: ${event.values[0]}, ${event.values[1]}, ${event.values[2]}")
         }
 
         //todo VIbration sensor events.

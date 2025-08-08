@@ -243,10 +243,6 @@ class SessionVM @Inject  constructor(
 
     //-----------Sensors --------------
     fun onResume(){
-        if(sessionProperties.value.useBrightnessSensor){
-            sensorRepository.registerBrightnessSensor()
-        }
-
         if(sessionProperties.value.useMicrophoneSensor){
             sensorRepository.registerSoundSensor()
             viewModelScope.launch {
@@ -256,11 +252,20 @@ class SessionVM @Inject  constructor(
                 }
             }
         }
+
+        if(sessionProperties.value.useBrightnessSensor){
+            sensorRepository.registerBrightnessSensor()
+        }
+
+        if(sessionProperties.value.useVibrationSensor){
+            sensorRepository.registerVibrationSensor()
+        }
     }
 
     fun onPause(){
-        sensorRepository.unregisterBrightnessSensor()
         sensorRepository.unregisterSoundSensor()
+        sensorRepository.unregisterBrightnessSensor()
+        sensorRepository.unregisterVibrationSensor()
     }
 
     //-----------Getter & Setter --------------
