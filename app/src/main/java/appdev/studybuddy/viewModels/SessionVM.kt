@@ -243,15 +243,16 @@ class SessionVM @Inject  constructor(
 
     //-----------Sensors --------------
     fun onResume(){
-        if(sessionProperties.value.useBrightnessSensor){ sensorRepository.registerBrightnessSensor() }
+        if(sessionProperties.value.useBrightnessSensor){
+            sensorRepository.registerBrightnessSensor()
+        }
 
         if(sessionProperties.value.useMicrophoneSensor){
             sensorRepository.registerSoundSensor()
             viewModelScope.launch {
                 while(true){
                     delay(1000)
-                    _soundLevel.value = sensorRepository.getAmplitude()
-                    Log.d("SENSOR","Sound: ${_soundLevel.value}")
+                    sensorRepository.recordSound()
                 }
             }
         }
