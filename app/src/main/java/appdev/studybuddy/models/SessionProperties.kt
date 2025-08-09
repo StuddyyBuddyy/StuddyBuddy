@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SessionProperties(
-    var useVibrationSensor: Boolean = false,
-    var useMicrophoneSensor: Boolean = false,
+    var useMovementSensor: Boolean = false,
+    var useSoundSensor: Boolean = false,
     var useBrightnessSensor: Boolean = false,
     var duration: Int  = 300, //duration in seconds
     var numBreaks: Int = 1,

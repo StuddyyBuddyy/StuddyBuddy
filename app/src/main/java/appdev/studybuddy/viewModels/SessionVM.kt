@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -166,8 +165,8 @@ class SessionVM @Inject  constructor(
         if (fail)
             return -points / 2
 
-        if (sessionProperties.value.useMicrophoneSensor) points += 5
-        if (sessionProperties.value.useVibrationSensor) points += 5
+        if (sessionProperties.value.useSoundSensor) points += 5
+        if (sessionProperties.value.useMovementSensor) points += 5
         if (sessionProperties.value.useBrightnessSensor) points += 5
 
         return points
@@ -243,7 +242,7 @@ class SessionVM @Inject  constructor(
 
     //-----------Sensors --------------
     fun onResume(){
-        if(sessionProperties.value.useMicrophoneSensor){
+        if(sessionProperties.value.useSoundSensor){
             sensorRepository.registerSoundSensor()
             viewModelScope.launch {
                 while(true){
@@ -257,15 +256,15 @@ class SessionVM @Inject  constructor(
             sensorRepository.registerBrightnessSensor()
         }
 
-        if(sessionProperties.value.useVibrationSensor){
-            sensorRepository.registerVibrationSensor()
+        if(sessionProperties.value.useMovementSensor){
+            sensorRepository.registerMovementSensor()
         }
     }
 
     fun onPause(){
         sensorRepository.unregisterSoundSensor()
         sensorRepository.unregisterBrightnessSensor()
-        sensorRepository.unregisterVibrationSensor()
+        sensorRepository.unregisterMovementSensor()
     }
 
     //-----------Getter & Setter --------------
@@ -289,13 +288,13 @@ class SessionVM @Inject  constructor(
         _elapsedSeconds.value = elapsedSeconds
     }
 
-    fun setUseMicrophoneSensor(useMicrophoneSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useMicrophoneSensor = useMicrophoneSensor)
+    fun setUseSoundSensor(useSoundSensor: Boolean){
+        _sessionProperties.value = _sessionProperties.value.copy(useSoundSensor = useSoundSensor)
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
     }
 
-    fun setUseVibrationSensor(useVibrationSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useVibrationSensor = useVibrationSensor)
+    fun setUseMovementSensor(useMovementSensor: Boolean){
+        _sessionProperties.value = _sessionProperties.value.copy(useMovementSensor = useMovementSensor)
         viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
     }
 

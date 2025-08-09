@@ -139,17 +139,17 @@ fun SessionPropertiesDialog(
 
                 item {
                     LabeledBox("Sensor Feedback:") {
-                        SessionSettingsRow("Allow Volume Feedback:") {
+                        SessionSettingsRow("Allow Sound Feedback:") {
                             Switch(
-                                checked = sessionProperties.useMicrophoneSensor,
-                                onCheckedChange = { viewModel.setUseMicrophoneSensor(it) }
+                                checked = sessionProperties.useSoundSensor,
+                                onCheckedChange = { viewModel.setUseSoundSensor(it) }
                             )
                         }
 
-                        SessionSettingsRow("Allow Vibration Feedback:") {
+                        SessionSettingsRow("Allow Movement Feedback:") {
                             Switch(
-                                checked = sessionProperties.useVibrationSensor,
-                                onCheckedChange = { viewModel.setUseVibrationSensor(it) }
+                                checked = sessionProperties.useMovementSensor,
+                                onCheckedChange = { viewModel.setUseMovementSensor(it) }
                             )
                         }
 
