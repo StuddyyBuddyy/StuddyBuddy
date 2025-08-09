@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -30,12 +31,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
@@ -44,6 +48,11 @@ class SessionVM @Inject  constructor(
 ) : ViewModel() {
 
     private val MIN_NOTIFICATION_TIME = 5
+
+    private val BRIGHTNESS_THRESHOLD = 10
+    private val SOUND_THRESHOLD = 500
+    private val MOVEMENT_TRHESOLD = 0.10 //Grenzwert in % (Wenn Handy mehr als x% bewegt wird)
+    private val BASE_ACCELERATION = 9.81
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
@@ -60,14 +69,14 @@ class SessionVM @Inject  constructor(
     private var _breakNotifier = MutableStateFlow<Int>(0)
     val breakNotifier : StateFlow<Int> = _breakNotifier
 
-    private var _lightLevel = MutableStateFlow<Double>(0.0)
-    val lightLevel : StateFlow<Double> = _lightLevel
+    private var _isTooDark = MutableStateFlow<Boolean>(true)
+    val isTooDark : StateFlow<Boolean> = _isTooDark
 
-    private var _soundLevel = MutableStateFlow<Int?>(0)
-    val soundLevel : StateFlow<Int?> = _soundLevel
+    private var _isTooLoud = MutableStateFlow<Boolean>(false)
+    val isTooLoud : StateFlow<Boolean> =  _isTooLoud
 
-    private var _vibrationLevel = MutableStateFlow<Int>(0)
-    val vibrationLevel : StateFlow<Int> = _vibrationLevel
+    private var _wasMobileMoved = MutableStateFlow<Boolean>(false)
+    val wasMobileMoved : StateFlow<Boolean> = _wasMobileMoved
 
     var interrupt : Boolean = false
 
@@ -77,6 +86,24 @@ class SessionVM @Inject  constructor(
     init {
         viewModelScope.launch {
             userPreferences.lastSessionProperties.collect { it -> _sessionProperties.value = it }
+        }
+
+        viewModelScope.launch {
+
+            combine(
+                sensorRepository.lightLevel,
+                sensorRepository.soundAmplitude,
+                sensorRepository.accelerationMagnitude
+            ) { lightLevel, soundAmplitude, accelerationMagnitude ->
+                _isTooDark.value = lightLevel < BRIGHTNESS_THRESHOLD
+                Log.d("SENSOR","Light: ${_isTooDark.value}")
+
+                _isTooLoud.value = soundAmplitude > SOUND_THRESHOLD
+                Log.d("SENSOR","Sound: ${_isTooLoud.value}")
+
+                _wasMobileMoved.value = (BASE_ACCELERATION-accelerationMagnitude).absoluteValue/100 > MOVEMENT_TRHESOLD
+                Log.d("SENSOR","Movement: ${_wasMobileMoved.value}")
+            }.collect()
         }
     }
 

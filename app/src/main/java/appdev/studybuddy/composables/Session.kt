@@ -15,8 +15,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -34,9 +37,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import appdev.studybuddy.R
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.viewModels.SessionVM
 
@@ -100,6 +105,29 @@ fun SessionScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                )
+                {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_light_mode_24),
+                        contentDescription = "Light Feedback",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Green
+                    )
+
+                    Spacer(Modifier.padding(10.dp))
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.speaker_filled_audio),
+                        contentDescription = "Light Feedback",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Green
+                    )
+
+                }
+
 
                 if(breakNotifier>0){
                     Text(

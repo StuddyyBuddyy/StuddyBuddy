@@ -28,8 +28,8 @@ class SensorRepository(
     private val _lightLevel = MutableStateFlow<Float>(0f)
     val lightLevel: StateFlow<Float> = _lightLevel
 
-    private val _soundAmplitude = MutableStateFlow<Int?>(0)
-    val soundAmplitude: StateFlow<Int?> = _soundAmplitude
+    private val _soundAmplitude = MutableStateFlow<Int>(0)
+    val soundAmplitude: StateFlow<Int> = _soundAmplitude
 
     private val _accelerationMagnitude = MutableStateFlow<Float>(0f)
     val accelerationMagnitude: StateFlow<Float> = _accelerationMagnitude
@@ -102,7 +102,6 @@ class SensorRepository(
 
             _accelerationMagnitude.value = sqrt(x*x+y*y+z*z)
         }
-
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -112,7 +111,7 @@ class SensorRepository(
     suspend fun recordSound(){
         while (soundSensor!=null) {
             delay(1000)
-            _soundAmplitude.value = soundSensor?.maxAmplitude
+            _soundAmplitude.value = soundSensor?.maxAmplitude!!
         }
     }
 
