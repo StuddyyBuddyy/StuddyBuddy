@@ -19,22 +19,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.ui.theme.Purple40
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
+import appdev.studybuddy.viewModels.DataVM
+import appdev.studybuddy.viewModels.UserVM
 
 @Composable
-fun LeaderboardScreen(navController: NavController){
+fun LeaderboardScreen(navController: NavController,
+                      userVM: UserVM = hiltViewModel(),
+                      dataVM: DataVM = viewModel()
+){
 
     val leaderboard = listOf(
         LeaderboardEntry("Anna", 450),
@@ -43,6 +47,10 @@ fun LeaderboardScreen(navController: NavController){
         LeaderboardEntry("David", 320),
         LeaderboardEntry("Eva", 300)
     )
+
+
+   // var leaderboard = dataVM.userPoints
+
 
     StudyBuddyScaffold {
         Column {
@@ -123,4 +131,9 @@ fun LeaderboardRow(entry: LeaderboardEntry) {
             )
         }
     }
+}
+
+fun computePlayerScore(userVM: UserVM){
+    userVM.currentUser
+
 }
