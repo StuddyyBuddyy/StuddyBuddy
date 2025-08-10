@@ -16,38 +16,37 @@ class SensorRepository(
     private val context: Context
 ): SensorEventListener {
 
-    private lateinit var sensorManager: SensorManager
+    private var sensorManager: SensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
     private var soundSensor: MediaRecorder? = null
     var brightnessSensor: Sensor? = null
     var movementSensor: Sensor? = null
 
-    lateinit var soundTacking: File
+    var soundTacking: File? = null
 
-    private val _lightLevel = MutableStateFlow<Float>(0f)
+    private val _lightLevel = MutableStateFlow<Float>(100f)
     val lightLevel: StateFlow<Float> = _lightLevel
 
     private val _soundAmplitude = MutableStateFlow<Int?>(0)
     val soundAmplitude: StateFlow<Int?> = _soundAmplitude
 
-    private val _accelerationMagnitude = MutableStateFlow<Float>(0f)
+    private val _accelerationMagnitude = MutableStateFlow<Float>(9.81f)
     val accelerationMagnitude: StateFlow<Float> = _accelerationMagnitude
 
     init {
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         brightnessSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         movementSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
 
-    fun registerSoundSensor(){
-        if (soundSensor == null) {
+    fun registerSoundSensor(useMicroPhone: Boolean){
+        if (soundSensor == null && useMicroPhone) {
             soundTacking = File.createTempFile("tempSoundTracking", ".3gp", context.cacheDir)
 
             soundSensor = MediaRecorder(context).apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
                 setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                 setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                setOutputFile(soundTacking.absolutePath)
+                setOutputFile(soundTacking?.absolutePath)
             }
 
             try {
@@ -55,7 +54,7 @@ class SensorRepository(
                 soundSensor?.start()
             } catch (e: Exception) {
                 e.printStackTrace()
-                soundTacking.delete()
+                soundTacking?.delete()
             }
         }
     }
@@ -77,7 +76,7 @@ class SensorRepository(
             stop()
             release()
         }
-        soundTacking.delete()
+        soundTacking?.delete()
         soundSensor = null
     }
 

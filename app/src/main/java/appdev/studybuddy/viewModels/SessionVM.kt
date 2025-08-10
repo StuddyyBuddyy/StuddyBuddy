@@ -68,7 +68,7 @@ class SessionVM @Inject  constructor(
     private var _breakNotifier = MutableStateFlow<Int>(0)
     val breakNotifier : StateFlow<Int> = _breakNotifier
 
-    private var _isTooDark = MutableStateFlow<Boolean>(true)
+    private var _isTooDark = MutableStateFlow<Boolean>(false)
     val isTooDark : StateFlow<Boolean> = _isTooDark
 
     private var _isTooLoud = MutableStateFlow<Boolean>(false)
@@ -161,6 +161,10 @@ class SessionVM @Inject  constructor(
             interrupt = true
             _elapsedSeconds.value = 0
         }
+
+        _isTooDark.value = false
+        _isTooLoud.value = false
+        _wasMobileMoved.value = false
 
         return successful
     }
@@ -263,7 +267,7 @@ class SessionVM @Inject  constructor(
     //-----------Sensors --------------
     fun onResume(){
         if(sessionProperties.value.useSoundSensor){
-            sensorRepository.registerSoundSensor()
+            sensorRepository.registerSoundSensor(sessionProperties.value.useSoundSensor)
             viewModelScope.launch {
                 while(true){
                     delay(1000)
