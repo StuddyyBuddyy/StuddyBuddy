@@ -9,9 +9,11 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun StudyBuddyScaffold(
-content: @Composable ()-> Unit)
-{
-    Scaffold(modifier = Modifier.fillMaxSize()){innerPadding ->
+    content: @Composable ()-> Unit
+) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+    ){innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             content()
         }

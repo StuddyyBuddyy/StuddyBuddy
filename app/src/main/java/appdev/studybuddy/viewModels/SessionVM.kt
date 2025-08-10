@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -18,7 +17,7 @@ import appdev.studybuddy.models.SessionProperties
 import appdev.studybuddy.models.User
 import appdev.studybuddy.models.DAO
 import appdev.studybuddy.models.DogResponse
-import appdev.studybuddy.models.SensorRepository
+import appdev.studybuddy.controller.SensorRepository
 import appdev.studybuddy.models.Session
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,7 +50,7 @@ class SessionVM @Inject  constructor(
 
     private val BRIGHTNESS_THRESHOLD = 10
     private val SOUND_THRESHOLD = 500
-    private val MOVEMENT_TRHESOLD = 0.10 //Grenzwert in % (Wenn Handy mehr als x% bewegt wird)
+    private val MOVEMENT_TRHESOLD = 0.05 //Grenzwert wenn Handy mehr als x% bewegt wird
     private val BASE_ACCELERATION = 9.81
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
@@ -89,20 +88,14 @@ class SessionVM @Inject  constructor(
         }
 
         viewModelScope.launch {
-
             combine(
                 sensorRepository.lightLevel,
                 sensorRepository.soundAmplitude,
                 sensorRepository.accelerationMagnitude
             ) { lightLevel, soundAmplitude, accelerationMagnitude ->
                 _isTooDark.value = lightLevel < BRIGHTNESS_THRESHOLD
-                Log.d("SENSOR","Light: ${_isTooDark.value}")
-
-                _isTooLoud.value = soundAmplitude > SOUND_THRESHOLD
-                Log.d("SENSOR","Sound: ${_isTooLoud.value}")
-
+                soundAmplitude?.let { _isTooLoud.value = it > SOUND_THRESHOLD }
                 _wasMobileMoved.value = (BASE_ACCELERATION-accelerationMagnitude).absoluteValue/100 > MOVEMENT_TRHESOLD
-                Log.d("SENSOR","Movement: ${_wasMobileMoved.value}")
             }.collect()
         }
     }

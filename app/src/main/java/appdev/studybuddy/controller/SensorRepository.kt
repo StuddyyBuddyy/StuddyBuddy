@@ -1,4 +1,4 @@
-package appdev.studybuddy.models
+package appdev.studybuddy.controller
 
 import android.content.Context
 import android.hardware.Sensor
@@ -6,7 +6,6 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.MediaRecorder
-import android.util.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +14,7 @@ import kotlin.math.sqrt
 
 class SensorRepository(
     private val context: Context
-): SensorEventListener  {
+): SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
 
@@ -28,8 +27,8 @@ class SensorRepository(
     private val _lightLevel = MutableStateFlow<Float>(0f)
     val lightLevel: StateFlow<Float> = _lightLevel
 
-    private val _soundAmplitude = MutableStateFlow<Int>(0)
-    val soundAmplitude: StateFlow<Int> = _soundAmplitude
+    private val _soundAmplitude = MutableStateFlow<Int?>(0)
+    val soundAmplitude: StateFlow<Int?> = _soundAmplitude
 
     private val _accelerationMagnitude = MutableStateFlow<Float>(0f)
     val accelerationMagnitude: StateFlow<Float> = _accelerationMagnitude
@@ -100,7 +99,7 @@ class SensorRepository(
             var y = event.values[1]
             var z = event.values[2]
 
-            _accelerationMagnitude.value = sqrt(x*x+y*y+z*z)
+            _accelerationMagnitude.value = sqrt(x * x + y * y + z * z)
         }
     }
 
@@ -111,7 +110,7 @@ class SensorRepository(
     suspend fun recordSound(){
         while (soundSensor!=null) {
             delay(1000)
-            _soundAmplitude.value = soundSensor?.maxAmplitude!!
+            _soundAmplitude.value = soundSensor?.maxAmplitude
         }
     }
 

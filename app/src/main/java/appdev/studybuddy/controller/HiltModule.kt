@@ -1,7 +1,8 @@
-package appdev.studybuddy.persistency
+package appdev.studybuddy.controller
 
 import android.content.Context
-import appdev.studybuddy.models.SensorRepository
+import appdev.studybuddy.controller.SensorRepository
+import appdev.studybuddy.persistency.UserPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +26,5 @@ object AppModule {
     fun provideSensorRepository(@ApplicationContext context: Context): SensorRepository {
         return SensorRepository(context)
     }
+
 }

@@ -12,17 +12,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -50,9 +50,8 @@ import appdev.studybuddy.viewModels.SessionVM
 fun SessionScreen(
     navController: NavController,
     viewModel: SessionVM = hiltViewModel()
-){
+) {
     StudyBuddyScaffold {
-
         var showFailDialog by remember { mutableStateOf(false) }
         var showSuccessDialog by remember { mutableStateOf(false) }
         var showErrorToast by remember { mutableStateOf(false) }
@@ -61,6 +60,10 @@ fun SessionScreen(
         val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
         val isBreak by viewModel.isBreak.collectAsState()
         val breakNotifier by viewModel.breakNotifier.collectAsState()
+
+        val isTooDark by viewModel.isTooDark.collectAsState()
+        val isTooLoud by viewModel.isTooLoud.collectAsState()
+        val wasMobileMoved by viewModel.wasMobileMoved.collectAsState()
 
         val imageUrl by viewModel.dogImageUrl.collectAsState()
         var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -91,45 +94,49 @@ fun SessionScreen(
         val minutesLeft = remainingSeconds / 60
         val secondsLeft = remainingSeconds % 60
 
-        if (remainingSeconds <= 0){
+        if (remainingSeconds <= 0) {
             showSuccessDialog = true
         }
 
+        // The main content is placed inside a Box to allow stacking.
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+            // Your existing centered UI elements
             Column(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly
-                )
-                {
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_light_mode_24),
                         contentDescription = "Light Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = Color.Green
+                        tint = if (isTooDark) Color.Red else Color.Green,
                     )
 
                     Spacer(Modifier.padding(10.dp))
 
                     Icon(
                         painter = painterResource(id = R.drawable.speaker_filled_audio),
-                        contentDescription = "Light Feedback",
+                        contentDescription = "Sound Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = Color.Green
+                        tint = if (isTooLoud) Color.Red else Color.Green,
                     )
-
                 }
 
+                if (wasMobileMoved) {
+                    Text(
+                        text = "Put your phone away!",
+                        color = Color.Red
+                    )
+                }
 
-                if(breakNotifier>0){
+                if (breakNotifier > 0) {
                     Text(
                         text = String.format("Break starts in: %d ", breakNotifier),
                         color = Color.Red,
@@ -145,25 +152,23 @@ fun SessionScreen(
                         modifier = Modifier.size(250.dp),
                         color = Color(0xFF000000),
                         strokeWidth = 12.dp,
-                        trackColor = if(!isBreak) Color.Green else Color.Red,
+                        trackColor = if (isBreak) Color.Red else Color.Green,
                         strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
                     )
 
                     Text(
                         text = String.format("%02d:%02d", minutesLeft, secondsLeft),
-                        color = if(!isBreak) Color.Green else Color.Red,
+                        color = if (isBreak) Color.Red else Color.Green,
                         style = MaterialTheme.typography.headlineMedium
                     )
-
                 }
 
-                if(isBreak){
+                if (isBreak) {
                     Text(
                         text = String.format("Take a break! XXX todo ", isBreak),
                         color = Color.Red,
                     )
                 }
-
 
                 Spacer(modifier = Modifier.padding(10.dp))
 
@@ -173,6 +178,20 @@ fun SessionScreen(
                     }
                 ) {
                     Text("End Session")
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+            ) {
+                if (isTooDark) {
+                    Banner(text = "Its to dark, you might wanna turn on some light!")
+                }
+
+                if (isTooLoud) {
+                    Banner(text = "Its to loud, you might wanna change your location!")
                 }
             }
 
@@ -314,6 +333,42 @@ fun ErrorToast() {
             "Something went wrong",
             Toast.LENGTH_SHORT
         ).show()
+    }
+}
+
+@Composable
+fun Banner(
+    text: String,
+    buttonText: String? = null,
+    buttonClickListener: (() -> Unit)? = null,
+) {
+    Column(
+        verticalArrangement = Arrangement.Top,
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(8.dp).background(Color.Red),
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            buttonText?.let {
+                TextButton(
+                    onClick = if (buttonClickListener != null) {
+                        buttonClickListener
+                    } else {
+                        {}
+                    }
+                ) {
+                    Text(
+                        text = buttonText,
+                    )
+                }
+            }
+        }
     }
 }
 
