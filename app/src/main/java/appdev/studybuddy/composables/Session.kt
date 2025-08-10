@@ -52,6 +52,7 @@ fun SessionScreen(
     viewModel: SessionVM = hiltViewModel()
 ) {
     StudyBuddyScaffold {
+
         var showFailDialog by remember { mutableStateOf(false) }
         var showSuccessDialog by remember { mutableStateOf(false) }
         var showErrorToast by remember { mutableStateOf(false) }
@@ -89,6 +90,7 @@ fun SessionScreen(
             }
         }
 
+        //Timer Berechnungen
         val progress = elapsedSeconds / sessionProperties.duration.toFloat()
         val remainingSeconds = sessionProperties.duration - elapsedSeconds
         val minutesLeft = remainingSeconds / 60
@@ -98,13 +100,11 @@ fun SessionScreen(
             showSuccessDialog = true
         }
 
-        // The main content is placed inside a Box to allow stacking.
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            // Your existing centered UI elements
-            Column(
+            Column( //Background Column für Timer
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -130,6 +130,9 @@ fun SessionScreen(
                 }
 
                 if (wasMobileMoved) {
+
+                    //todo was soll alles passieren wenn Handy bewegt wird? Session abbrechen?
+
                     Text(
                         text = "Put your phone away!",
                         color = Color.Red
@@ -181,7 +184,7 @@ fun SessionScreen(
                 }
             }
 
-            Column(
+            Column( //Column am oberen Bildschirmrand für Notification Banner
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
