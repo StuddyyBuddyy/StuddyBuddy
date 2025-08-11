@@ -8,6 +8,7 @@ import appdev.studybuddy.models.User
 class DataVM : ViewModel() {
     val dao = DAO()
     val userPoints = mutableMapOf<String, Int>()
+    val sessionPoints = mutableMapOf<String, Int>()
 
     suspend fun sortUsersByPoints(): Map<String, Int>{
             for (user in dao.getAllUsers()) {
@@ -27,5 +28,12 @@ class DataVM : ViewModel() {
         return totalPoints
     }
 
+    suspend fun sortSessionPoints(user: User): Map<String, Int>{
+        for (session in dao.getUserSessions(user.email)){
+            sessionPoints[session.date] = session.points
+        }
+        Log.d("SessionPoints", sessionPoints.toString())
+        return sessionPoints.toList().sortedByDescending { (_, value) -> value }.toMap()
+    }
 
 }

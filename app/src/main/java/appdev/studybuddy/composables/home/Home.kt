@@ -1,5 +1,6 @@
 package appdev.studybuddy.composables.home
 
+import LeaderboardRow
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -9,19 +10,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,20 +39,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
+import appdev.studybuddy.ui.theme.Purple40
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
 import appdev.studybuddy.ui.theme.logOutRed
+import appdev.studybuddy.viewModels.DataVM
 import appdev.studybuddy.viewModels.UserVM
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    userVM: UserVM = hiltViewModel()
+                navController: NavController,
+                userVM: UserVM = hiltViewModel(),
+                dataVM: DataVM = viewModel()
 ) {
     StudyBuddyScaffold {
         var displaySessionDialog by remember { mutableStateOf(false) }
@@ -54,6 +72,13 @@ fun HomeScreen(
             SessionPropertiesDialog(
                 onDismiss = { displaySessionDialog = false }
             )
+        }
+
+        var personalScoreboard: Map<String, Int> by remember { mutableStateOf(emptyMap()) }
+        LaunchedEffect(userVM.currentUser) {
+            userVM.currentUser?.let { user ->
+                personalScoreboard = dataVM.sortSessionPoints(user)
+            }
         }
 
         BackHandler {
@@ -115,10 +140,51 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
+            Spacer(modifier = Modifier.padding(10.dp))
+
             Text(
                 text = "Hello ${userVM.currentUser?.username}!",
                 color = PurpleButton,
+                fontSize = 30.sp,
+                fontStyle = MaterialTheme.typography.bodyLarge.fontStyle
             )
+
+            Spacer(modifier = Modifier.padding(10.dp))
+
+            if(personalScoreboard.isEmpty()){
+                val composition by rememberLottieComposition(
+                    LottieCompositionSpec.RawRes(R.raw.loadingbook)
+                )
+                val progress by animateLottieCompositionAsState(
+                    composition,
+                    iterations = LottieConstants.IterateForever
+                )
+
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.size(400.dp)
+                    )
+                }
+
+            } else {
+
+                Spacer(modifier = Modifier.padding(10.dp))
+
+                LazyColumn(
+                    modifier = Modifier
+                        //.fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(personalScoreboard.toList()) { (sessionDate, points) ->
+                        PersonalScoreboardRow(sessionDate, points)
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.padding(10.dp))
 
@@ -198,3 +264,32 @@ fun LogoutDialog(
     }
 }
 
+@Composable
+fun PersonalScoreboardRow(sessionDate: String, points: Int){
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = PurpleBackground),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = sessionDate,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Purple40
+            )
+            Text(
+                text = "$points Punkte",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Purple40
+            )
+        }
+    }
+}

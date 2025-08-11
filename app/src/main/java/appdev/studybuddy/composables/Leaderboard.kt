@@ -47,7 +47,8 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 
 @Composable
-fun LeaderboardScreen(navController: NavController,
+fun LeaderboardScreen(
+                      navController: NavController,
                       userVM: UserVM = hiltViewModel(),
                       dataVM: DataVM = viewModel()
 ){
@@ -100,7 +101,6 @@ fun LeaderboardScreen(navController: NavController,
                 )
 
                 Box(
-                    //modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     LottieAnimation(
