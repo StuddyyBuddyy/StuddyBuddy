@@ -116,7 +116,7 @@ fun HomeScreen(
         ) {
 
             Text(
-                text = "Hello ${userVM.currentUser}!",
+                text = "Hello ${userVM.currentUser?.username}!",
                 color = PurpleButton,
             )
 
