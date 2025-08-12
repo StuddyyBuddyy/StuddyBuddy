@@ -189,6 +189,8 @@ fun RegisterScreen(
     navController: NavController,
     userVM: UserVM = hiltViewModel()
 ) {
+
+    var showPassword by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -235,8 +237,38 @@ fun RegisterScreen(
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") }
+                onValueChange = { newText ->
+                    password = newText
+                },
+                label = {
+                    Text(text = "Password")
+                },
+                visualTransformation = if (showPassword) {
+                    VisualTransformation.None
+                } else {
+
+                    PasswordVisualTransformation()
+
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    if (showPassword) {
+                        IconButton(onClick = { showPassword = false }) {
+                            Icon(
+                                imageVector = Icons.Filled.Visibility,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { showPassword = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.VisibilityOff,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
