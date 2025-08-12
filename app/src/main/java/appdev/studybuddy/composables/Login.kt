@@ -13,7 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,8 +50,10 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
+    var showPassword by remember { mutableStateOf(false) }
+
     var hasPermission by remember { mutableStateOf(false) }
-    var context = LocalContext.current
+    val context = LocalContext.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -92,9 +103,40 @@ fun LoginScreen(
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") }
+                onValueChange = { newText ->
+                    password = newText
+                },
+                label = {
+                    Text(text = "Password")
+                },
+                visualTransformation = if (showPassword) {
+                    VisualTransformation.None
+                } else {
+
+                    PasswordVisualTransformation()
+
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    if (showPassword) {
+                        IconButton(onClick = { showPassword = false }) {
+                            Icon(
+                                imageVector = Icons.Filled.Visibility,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { showPassword = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.VisibilityOff,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    }
+                }
             )
+
 
             Spacer(modifier = Modifier.padding(16.dp))
 
@@ -147,6 +189,8 @@ fun RegisterScreen(
     navController: NavController,
     userVM: UserVM = hiltViewModel()
 ) {
+
+    var showPassword by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -193,8 +237,38 @@ fun RegisterScreen(
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") }
+                onValueChange = { newText ->
+                    password = newText
+                },
+                label = {
+                    Text(text = "Password")
+                },
+                visualTransformation = if (showPassword) {
+                    VisualTransformation.None
+                } else {
+
+                    PasswordVisualTransformation()
+
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    if (showPassword) {
+                        IconButton(onClick = { showPassword = false }) {
+                            Icon(
+                                imageVector = Icons.Filled.Visibility,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { showPassword = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.VisibilityOff,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
