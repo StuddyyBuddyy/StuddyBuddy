@@ -51,23 +51,24 @@ fun SessionScreen(
     navController: NavController,
     viewModel: SessionVM = hiltViewModel()
 ) {
+
+    var showFailDialog by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var showErrorToast by remember { mutableStateOf(false) }
+
+    val sessionProperties by viewModel.sessionProperties.collectAsState()
+    val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
+    val isBreak by viewModel.isBreak.collectAsState()
+    val breakNotifier by viewModel.breakNotifier.collectAsState()
+
+    val isTooDark by viewModel.isTooDark.collectAsState()
+    val isTooLoud by viewModel.isTooLoud.collectAsState()
+    val wasMobileMoved by viewModel.wasMobileMoved.collectAsState()
+
+    val imageUrl by viewModel.dogImageUrl.collectAsState()
+    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     StudyBuddyScaffold {
 
-        var showFailDialog by remember { mutableStateOf(false) }
-        var showSuccessDialog by remember { mutableStateOf(false) }
-        var showErrorToast by remember { mutableStateOf(false) }
-
-        val sessionProperties by viewModel.sessionProperties.collectAsState()
-        val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
-        val isBreak by viewModel.isBreak.collectAsState()
-        val breakNotifier by viewModel.breakNotifier.collectAsState()
-
-        val isTooDark by viewModel.isTooDark.collectAsState()
-        val isTooLoud by viewModel.isTooLoud.collectAsState()
-        val wasMobileMoved by viewModel.wasMobileMoved.collectAsState()
-
-        val imageUrl by viewModel.dogImageUrl.collectAsState()
-        var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
         BackHandler {
             showFailDialog = true
@@ -262,15 +263,15 @@ fun EndSessionDialogFail(
     onDismiss: () -> Unit
 ) {
     DialogBox {
-        Column (modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text("End Session?")
             Text("Are you sure you want to end this session early?")
             Row {
-                Button(onClick = onConfirm){
+                Button(onClick = onConfirm) {
                     Text("Confirm")
                 }
 
-                Button(onClick = onDismiss){
+                Button(onClick = onDismiss) {
                     Text("Cancel")
                 }
             }
@@ -282,10 +283,10 @@ fun EndSessionDialogFail(
 fun EndSessionDialogSuccess(
     onConfirm: () -> Unit,
     onDownload: () -> Unit,
-    image : ImageBitmap?
+    image: ImageBitmap?
 ) {
     DialogBox {
-        Column (modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text("Congratulations!")
             Text("Here is a cute Dog Picture for you!")
             if (image != null) {
@@ -303,7 +304,8 @@ fun EndSessionDialogSuccess(
                 }
 
                 Spacer(modifier = Modifier.size(12.dp))
-                Button(onClick = onDownload
+                Button(
+                    onClick = onDownload
                 ) {
                     Text("Download")
                 }
@@ -316,13 +318,13 @@ fun EndSessionDialogSuccess(
 fun DialogBox(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
-){
+) {
     Box(
         modifier = modifier
             .padding(48.dp)
             .clip(shape = RoundedCornerShape(20.dp))
             .background(color = PurpleBackground)
-    ){
+    ) {
         content()
     }
 }
@@ -350,7 +352,9 @@ fun Banner(
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(8.dp).background(Color.Red),
+            modifier = Modifier
+                .padding(8.dp)
+                .background(Color.Red),
         )
         Row(
             modifier = Modifier
