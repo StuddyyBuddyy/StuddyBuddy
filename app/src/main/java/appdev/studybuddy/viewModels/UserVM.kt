@@ -50,7 +50,7 @@ class UserVM @Inject constructor(
         }
         val user: User = userNullable
 
-        if (bypassPassword || verifyPassword(password, user.password)) {
+        if (bypassPassword || password == user.password /*for old plaintext passwords*/ || verifyPassword(password, user.password) ) {
             currentUser = user
             viewModelScope.launch {
                 userPreferences.saveLastUser(user)
