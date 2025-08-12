@@ -1,14 +1,12 @@
 package appdev.studybuddy.viewModels
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -19,6 +17,7 @@ import appdev.studybuddy.models.SessionProperties
 import appdev.studybuddy.models.User
 import appdev.studybuddy.models.DAO
 import appdev.studybuddy.models.DogResponse
+import appdev.studybuddy.controller.SensorRepository
 import appdev.studybuddy.models.Session
 import appdev.studybuddy.persistency.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,19 +30,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val sensorRepository: SensorRepository
 ) : ViewModel() {
 
     private val MIN_NOTIFICATION_TIME = 5
+
+    private val BRIGHTNESS_THRESHOLD = 10
+    private val SOUND_THRESHOLD = 500
+    private val MOVEMENT_TRHESOLD = 0.05 //Grenzwert wenn Handy mehr als x% bewegt wird
+    private val BASE_ACCELERATION = 9.81
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
@@ -60,6 +68,15 @@ class SessionVM @Inject  constructor(
     private var _breakNotifier = MutableStateFlow<Int>(0)
     val breakNotifier : StateFlow<Int> = _breakNotifier
 
+    private var _isTooDark = MutableStateFlow<Boolean>(false)
+    val isTooDark : StateFlow<Boolean> = _isTooDark
+
+    private var _isTooLoud = MutableStateFlow<Boolean>(false)
+    val isTooLoud : StateFlow<Boolean> =  _isTooLoud
+
+    private var _wasMobileMoved = MutableStateFlow<Boolean>(false)
+    val wasMobileMoved : StateFlow<Boolean> = _wasMobileMoved
+
     var interrupt : Boolean = false
 
     lateinit var user : User
@@ -69,8 +86,24 @@ class SessionVM @Inject  constructor(
         viewModelScope.launch {
             userPreferences.lastSessionProperties.collect { it -> _sessionProperties.value = it }
         }
+
+        viewModelScope.launch {
+            combine(
+                sensorRepository.lightLevel,
+                sensorRepository.soundAmplitude,
+                sensorRepository.accelerationMagnitude
+            ) { lightLevel, soundAmplitude, accelerationMagnitude ->
+                _isTooDark.value = lightLevel < BRIGHTNESS_THRESHOLD
+                soundAmplitude?.let { _isTooLoud.value = it > SOUND_THRESHOLD }
+                _wasMobileMoved.value = (BASE_ACCELERATION-accelerationMagnitude).absoluteValue/100 > MOVEMENT_TRHESOLD
+            }.collect()
+        }
     }
 
+    /**
+     * Starte den Timer im SessionScreen. Trackt dabei Pausen (wechselt isBreak)
+     * MIN_NOTIFICATION_TIME gibt an wieviele Sekunden vor einer Pause der Nutzer benachrichtigt wird.
+     */
     suspend fun startTimer(){
         interrupt = false
 
@@ -112,71 +145,9 @@ class SessionVM @Inject  constructor(
         }
     }
 
-    fun getHours(): Int{
-        return sessionProperties.value.duration / 3600
-    }
-
-    fun getMinutes(): Int{
-        return (sessionProperties.value.duration % 3600) / 60
-    }
-
-    fun getBreakHours(): Int{
-        return sessionProperties.value.durationBreak / 3600
-    }
-
-    fun getBreakMinutes(): Int{
-        return (sessionProperties.value.durationBreak % 3600) / 60
-    }
-
-    fun setElapsedSeconds(elapsedSeconds: Int){
-        _elapsedSeconds.value = elapsedSeconds
-    }
-
-    fun setUseMicrophoneSensor(useMicrophoneSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useMicrophoneSensor = useMicrophoneSensor)
-        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
-    }
-
-    fun setUseVibrationSensor(useVibrationSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useVibrationSensor = useVibrationSensor)
-        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
-    }
-
-    fun setUseBrightnessSensor(useBrightnessSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useBrightnessSensor = useBrightnessSensor)
-        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
-    }
-
-    fun setDuration(hours: Int, minutes: Int){
-        if((hours*3600+ minutes*60)/2<=sessionProperties.value.numBreaks*sessionProperties.value.durationBreak){
-            _isInvalidBreak.value = true
-        }else {
-            _isInvalidBreak.value = false
-            _sessionProperties.value = _sessionProperties.value.copy(duration = (hours * 3600) + (minutes * 60))
-            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
-        }
-    }
-
-    fun setNumBreaks(numBreaks: Int){
-        if(sessionProperties.value.duration/2<=numBreaks*sessionProperties.value.durationBreak){
-            _isInvalidBreak.value = true
-        }else {
-            _isInvalidBreak.value = false
-            _sessionProperties.value = _sessionProperties.value.copy(numBreaks = numBreaks)
-            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
-        }
-    }
-
-    fun setBreakDuration(hours: Int, minutes: Int) {
-        if (sessionProperties.value.duration/2 <= sessionProperties.value.numBreaks*(hours * 3600 + minutes * 60)) {
-            _isInvalidBreak.value = true
-        } else {
-            _isInvalidBreak.value = false
-            _sessionProperties.value = _sessionProperties.value.copy(durationBreak = (hours * 3600) + (minutes * 60))
-            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
-        }
-    }
-
+    /**
+     * Session beenden und in Datenbank speichern
+     */
     fun endSession(fail : Boolean = false) : Boolean{
         val points = calculatePoints(fail)
         val session = createCompanionObject(points)
@@ -190,6 +161,10 @@ class SessionVM @Inject  constructor(
             interrupt = true
             _elapsedSeconds.value = 0
         }
+
+        _isTooDark.value = false
+        _isTooLoud.value = false
+        _wasMobileMoved.value = false
 
         return successful
     }
@@ -214,8 +189,8 @@ class SessionVM @Inject  constructor(
         if (fail)
             return -points / 2
 
-        if (sessionProperties.value.useMicrophoneSensor) points += 5
-        if (sessionProperties.value.useVibrationSensor) points += 5
+        if (sessionProperties.value.useSoundSensor) points += 5
+        if (sessionProperties.value.useMovementSensor) points += 5
         if (sessionProperties.value.useBrightnessSensor) points += 5
 
         return points
@@ -289,5 +264,97 @@ class SessionVM @Inject  constructor(
         }
     }
 
+    //-----------Sensors --------------
+    fun onResume(){
+        if(sessionProperties.value.useSoundSensor){
+            sensorRepository.registerSoundSensor(sessionProperties.value.useSoundSensor)
+            viewModelScope.launch {
+                while(true){
+                    delay(1000)
+                    sensorRepository.recordSound()
+                }
+            }
+        }
+
+        if(sessionProperties.value.useBrightnessSensor){
+            sensorRepository.registerBrightnessSensor()
+        }
+
+        if(sessionProperties.value.useMovementSensor){
+            sensorRepository.registerMovementSensor()
+        }
+    }
+
+    fun onPause(){
+        sensorRepository.unregisterSoundSensor()
+        sensorRepository.unregisterBrightnessSensor()
+        sensorRepository.unregisterMovementSensor()
+    }
+
+    //-----------Getter & Setter --------------
+    fun getHours(): Int{
+        return sessionProperties.value.duration / 3600
+    }
+
+    fun getMinutes(): Int{
+        return (sessionProperties.value.duration % 3600) / 60
+    }
+
+    fun getBreakHours(): Int{
+        return sessionProperties.value.durationBreak / 3600
+    }
+
+    fun getBreakMinutes(): Int{
+        return (sessionProperties.value.durationBreak % 3600) / 60
+    }
+
+    fun setElapsedSeconds(elapsedSeconds: Int){
+        _elapsedSeconds.value = elapsedSeconds
+    }
+
+    fun setUseSoundSensor(useSoundSensor: Boolean){
+        _sessionProperties.value = _sessionProperties.value.copy(useSoundSensor = useSoundSensor)
+        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+    }
+
+    fun setUseMovementSensor(useMovementSensor: Boolean){
+        _sessionProperties.value = _sessionProperties.value.copy(useMovementSensor = useMovementSensor)
+        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+    }
+
+    fun setUseBrightnessSensor(useBrightnessSensor: Boolean){
+        _sessionProperties.value = _sessionProperties.value.copy(useBrightnessSensor = useBrightnessSensor)
+        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
+    }
+
+    fun setDuration(hours: Int, minutes: Int){
+        if((hours*3600+ minutes*60)/2<=sessionProperties.value.numBreaks*sessionProperties.value.durationBreak){
+            _isInvalidBreak.value = true
+        }else {
+            _isInvalidBreak.value = false
+            _sessionProperties.value = _sessionProperties.value.copy(duration = (hours * 3600) + (minutes * 60))
+            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+        }
+    }
+
+    fun setNumBreaks(numBreaks: Int){
+        if(sessionProperties.value.duration/2<=numBreaks*sessionProperties.value.durationBreak){
+            _isInvalidBreak.value = true
+        }else {
+            _isInvalidBreak.value = false
+            _sessionProperties.value = _sessionProperties.value.copy(numBreaks = numBreaks)
+            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
+        }
+    }
+
+    fun setBreakDuration(hours: Int, minutes: Int) {
+        if (sessionProperties.value.duration/2 <= sessionProperties.value.numBreaks*(hours * 3600 + minutes * 60)) {
+            _isInvalidBreak.value = true
+        } else {
+            _isInvalidBreak.value = false
+            _sessionProperties.value = _sessionProperties.value.copy(durationBreak = (hours * 3600) + (minutes * 60))
+            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
+        }
+    }
 }
 
