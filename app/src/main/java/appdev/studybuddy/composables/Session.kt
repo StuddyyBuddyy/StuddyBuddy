@@ -1,7 +1,11 @@
 package appdev.studybuddy.composables
 
-
+import androidx.compose.runtime.rememberCoroutineScope
 import android.annotation.SuppressLint
+import android.content.Context
+import android.media.MediaPlayer
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -44,6 +48,7 @@ import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.viewModels.SessionVM
+import kotlinx.coroutines.launch
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -51,6 +56,7 @@ fun SessionScreen(
     navController: NavController,
     viewModel: SessionVM = hiltViewModel()
 ) {
+    val context = LocalContext.current
 
     var showFailDialog by remember { mutableStateOf(false) }
     var showSuccessDialog by remember { mutableStateOf(false) }
@@ -67,6 +73,9 @@ fun SessionScreen(
 
     val imageUrl by viewModel.dogImageUrl.collectAsState()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
+
     StudyBuddyScaffold {
 
 
@@ -200,10 +209,14 @@ fun SessionScreen(
             }
 
             if (showFailDialog) {
+
                 EndSessionDialogFail(
                     onConfirm = {
                         val successful = viewModel.endSession(fail = true)
                         if (successful) {
+                            coroutineScope.launch {
+                                alarm(context)
+                            }
                             navController.popBackStack()
                             showFailDialog = false
                         } else {
@@ -250,7 +263,7 @@ fun SessionScreen(
             }
 
             if (showErrorToast) {
-                ErrorToast()
+                ErrorToast(context)
                 showErrorToast = false
             }
         }
@@ -330,8 +343,7 @@ fun DialogBox(
 }
 
 @Composable
-fun ErrorToast() {
-    val context = LocalContext.current
+fun ErrorToast(context : Context) {
     LaunchedEffect(Unit) {
         Toast.makeText(
             context,
@@ -379,3 +391,8 @@ fun Banner(
     }
 }
 
+suspend fun alarm(context: Context) {
+    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
+        vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat
+}
