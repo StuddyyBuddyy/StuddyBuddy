@@ -1,6 +1,5 @@
 package appdev.studybuddy.composables
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.RECORD_AUDIO
 import android.content.pm.PackageManager
 import android.util.Log

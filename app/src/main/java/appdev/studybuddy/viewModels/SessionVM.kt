@@ -313,18 +313,27 @@ class SessionVM @Inject  constructor(
     }
 
     fun setUseSoundSensor(useSoundSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useSoundSensor = useSoundSensor)
-        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+        viewModelScope.launch {
+            userPreferences.saveSessionProperties(
+                _sessionProperties.value.copy(useSoundSensor = useSoundSensor)
+            )
+        }
     }
 
     fun setUseMovementSensor(useMovementSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useMovementSensor = useMovementSensor)
-        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+        viewModelScope.launch {
+            userPreferences.saveSessionProperties(
+                _sessionProperties.value.copy(useMovementSensor = useMovementSensor)
+            )
+        }
     }
 
     fun setUseBrightnessSensor(useBrightnessSensor: Boolean){
-        _sessionProperties.value = _sessionProperties.value.copy(useBrightnessSensor = useBrightnessSensor)
-        viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
+        viewModelScope.launch {
+            userPreferences.saveSessionProperties(
+                _sessionProperties.value.copy(useBrightnessSensor = useBrightnessSensor)
+            )
+        }
     }
 
     fun setDuration(hours: Int, minutes: Int){
@@ -332,8 +341,11 @@ class SessionVM @Inject  constructor(
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
-            _sessionProperties.value = _sessionProperties.value.copy(duration = (hours * 3600) + (minutes * 60))
-            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value)}
+            viewModelScope.launch {
+                userPreferences.saveSessionProperties(
+                    _sessionProperties.value.copy(duration = (hours * 3600) + (minutes * 60))
+                )
+            }
         }
     }
 
@@ -342,8 +354,11 @@ class SessionVM @Inject  constructor(
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
-            _sessionProperties.value = _sessionProperties.value.copy(numBreaks = numBreaks)
-            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
+            viewModelScope.launch {
+                userPreferences.saveSessionProperties(
+                    _sessionProperties.value.copy(numBreaks = numBreaks)
+                )
+            }
         }
     }
 
@@ -352,8 +367,11 @@ class SessionVM @Inject  constructor(
             _isInvalidBreak.value = true
         } else {
             _isInvalidBreak.value = false
-            _sessionProperties.value = _sessionProperties.value.copy(durationBreak = (hours * 3600) + (minutes * 60))
-            viewModelScope.launch { userPreferences.saveSessionProperties(sessionProperties.value) }
+            viewModelScope.launch {
+                userPreferences.saveSessionProperties(
+                    _sessionProperties.value.copy(durationBreak = (hours * 3600) + (minutes * 60))
+                )
+            }
         }
     }
 }
