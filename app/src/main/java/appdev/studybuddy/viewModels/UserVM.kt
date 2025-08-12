@@ -1,6 +1,5 @@
 package appdev.studybuddy.viewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.mindrot.jbcrypt.BCrypt
 
 @HiltViewModel
 class UserVM @Inject constructor(
@@ -40,7 +40,7 @@ class UserVM @Inject constructor(
     }
 
 
-    fun login(email: String, password: String): Boolean {
+    fun login(email: String, password: String, bypassPassword: Boolean = false): Boolean {
         val userNullable: User?
         runBlocking {
             userNullable = dao.getUserByEmail(email)
@@ -50,36 +50,41 @@ class UserVM @Inject constructor(
         }
         val user: User = userNullable
 
-        if (user.password == password) {
+        if (bypassPassword || verifyPassword(password, user.password)) {
             currentUser = user
-            Log.d("Login", "launch VMScope")
             viewModelScope.launch {
                 userPreferences.saveLastUser(user)
             }
-            Log.d("Login", "successful")
             return true
         } else {
-            Log.d("Login", "${user.password} != $password")
             return false
         }
     }
 
+    fun hashPassword(password: String): String {
+        return BCrypt.hashpw(password, BCrypt.gensalt(12))
+    }
+
+    fun verifyPassword(password: String, hashedPassword: String): Boolean {
+        return BCrypt.checkpw(password, hashedPassword)
+    }
+
     fun register(email: String, password: String, username: String): Boolean {
-        val user = User(username, email, password)
+        val user = User(username, email, hashPassword(password))
         var success: Boolean
         runBlocking {
             success = dao.insertUser(user)
         }
 
         if (success) {
-            success = login(user.email, user.password)
+            success = login(email, password)
         }
 
         return success
     }
 
     fun autoLogin(): Boolean {
-        return currentUser != null && login(currentUser!!.email, currentUser!!.password)
+        return currentUser != null && login(currentUser!!.email, "", bypassPassword = true)
     }
 
     fun logout() {
