@@ -349,14 +349,15 @@ class SessionVM @Inject  constructor(
         }
     }
 
-    fun setNumBreaks(numBreaks: Int){
-        if(sessionProperties.value.duration/2<=numBreaks*sessionProperties.value.durationBreak){
+    fun setNumBreaks(numBreaks: String){
+
+        if(sessionProperties.value.duration/2<=numBreaks.toInt()*sessionProperties.value.durationBreak || numBreaks.isEmpty()){
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
             viewModelScope.launch {
                 userPreferences.saveSessionProperties(
-                    _sessionProperties.value.copy(numBreaks = numBreaks)
+                    _sessionProperties.value.copy(numBreaks = numBreaks.toInt())
                 )
             }
         }
