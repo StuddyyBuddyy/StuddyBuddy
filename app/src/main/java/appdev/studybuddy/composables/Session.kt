@@ -57,10 +57,8 @@ fun SessionScreen(
 ) {
     val context = LocalContext.current
 
-    var showFailDialog by remember { mutableStateOf(false) }
-    var showSuccessDialog by remember { mutableStateOf(false) }
     var showErrorToast by remember { mutableStateOf(false) }
-    var showDescriptionDialog by remember { mutableStateOf(false) }
+    var dialogOption by remember { mutableStateOf(DialogOption.NONE) }
 
     val sessionProperties by viewModel.sessionProperties.collectAsState()
     val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
@@ -80,7 +78,7 @@ fun SessionScreen(
 
 
         BackHandler {
-            showFailDialog = true
+            dialogOption = DialogOption.INTERRUPT
         }
 
         LaunchedEffect(imageUrl) {
@@ -106,8 +104,8 @@ fun SessionScreen(
         val minutesLeft = remainingSeconds / 60
         val secondsLeft = remainingSeconds % 60
 
-        if (remainingSeconds <= 0) {
-            showDescriptionDialog = true
+        if (remainingSeconds == 0 && dialogOption == DialogOption.NONE) {
+            dialogOption = DialogOption.DESCRIPTION_SUCCESS
         }
 
         Box(
@@ -187,7 +185,7 @@ fun SessionScreen(
 
                 Button(
                     onClick = {
-                        showFailDialog = true
+                        dialogOption = DialogOption.INTERRUPT
                     }
                 ) {
                     Text("End Session")
@@ -208,66 +206,83 @@ fun SessionScreen(
                 }
             }
 
-            if (showFailDialog) {
-                EndSessionDialogFail(
-                    onConfirm = {
-                        val successful = viewModel.endSession(fail = true)
-                        if (successful) {
-                            coroutineScope.launch {
-                                viewModel.alarm(context)
-                            }
-                            navController.popBackStack()
-                            showFailDialog = false
-                        } else {
-                            showErrorToast = true
-                        }
-                    },
-                    onDismiss = { showFailDialog = false }
-                )
-            }
+            when (dialogOption) {
+                DialogOption.NONE -> {}
 
-            if (showSuccessDialog) {
-                LaunchedEffect(Unit) {
-                    viewModel.fetchDogImage()
+                DialogOption.SUCCESS -> {
+                    LaunchedEffect(Unit) {
+                        viewModel.fetchDogImage()
+                    }
+
+                    EndSessionDialogSuccess(
+                        onConfirm = {
+                            val successful = viewModel.endSession()
+                            if (successful) {
+                                navController.popBackStack()
+                                dialogOption = DialogOption.NONE
+                            } else {
+                                showErrorToast = true
+                            }
+                        },
+                        onDownload = {
+                            imageBitmap?.let {
+                                val success = viewModel.saveImageToGallery(
+                                    context = context,
+                                    image = it,
+                                    fileName = "dog_${System.currentTimeMillis()}.jpg"
+                                )
+
+                                Toast.makeText(
+                                    context,
+                                    if (success) "Download successful" else "Download failed",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                        image = imageBitmap
+                    )
                 }
 
-                EndSessionDialogSuccess(
-                    onConfirm = {
-                        val successful = viewModel.endSession()
-                        if (successful) {
-                            navController.popBackStack()
-                            showSuccessDialog = false
-                        } else {
-                            showErrorToast = true
-                        }
-                    },
-                    onDownload = {
-                        imageBitmap?.let {
-                            val success = viewModel.saveImageToGallery(
-                                context = context,
-                                image = it,
-                                fileName = "dog_${System.currentTimeMillis()}.jpg"
-                            )
+                DialogOption.INTERRUPT -> {
+                    EndSessionDialogFail(
+                        onConfirm = {
+                            dialogOption = DialogOption.DESCRIPTION_FAIL
+                        },
+                        onDismiss = { dialogOption = DialogOption.NONE }
+                    )
+                }
 
-                            Toast.makeText(
-                                context,
-                                if (success) "Download successful" else "Download failed",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    },
-                    image = imageBitmap
-                )
-            }
+                DialogOption.DESCRIPTION_FAIL -> {
+                    DescriptionDialog(
+                        onConfirm = {
+                            val successful = viewModel.endSession(fail = true)
+                            if (successful) {
+                                coroutineScope.launch {
+                                    viewModel.alarm(context)
+                                }
+                                navController.popBackStack()
+                                dialogOption = DialogOption.NONE
+                            } else {
+                                showErrorToast = true
+                            }
+                        },
+                        onDismiss = {
+                            dialogOption = DialogOption.NONE
+                        },
+                        sessionVM = viewModel
+                    )
+                }
 
-            if (showDescriptionDialog && !showSuccessDialog){
-                DescriptionDialog(
-                    onConfirm = {
-                        showSuccessDialog = true
-                    },
-                    onDismiss = {},
-                    sessionVM = viewModel
-                )
+                DialogOption.DESCRIPTION_SUCCESS -> {
+                    DescriptionDialog(
+                        onConfirm = {
+                            dialogOption = DialogOption.SUCCESS
+                        },
+                        onDismiss = {},
+                        dismissable = false,
+                        sessionVM = viewModel
+                    )
+                }
             }
 
             if (showErrorToast) {
@@ -341,19 +356,19 @@ fun DescriptionDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     sessionVM: SessionVM,
-    dismissable : Boolean = false
-){
+    dismissable: Boolean = true
+) {
     var text by remember { mutableStateOf("") }
 
     DialogBox {
-        Column (modifier = Modifier.padding(16.dp)){
+        Column(modifier = Modifier.padding(16.dp)) {
             Text("Please Enter Description for this Session!")
             TextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min=200.dp),
+                    .heightIn(min = 200.dp),
                 value = text,
-                onValueChange = {text = it}
+                onValueChange = { text = it }
             )
             Row(modifier = Modifier.padding(16.dp)) {
                 Button(
@@ -365,7 +380,7 @@ fun DescriptionDialog(
                     Text("Confirm")
                 }
 
-                if (dismissable){
+                if (dismissable) {
                     Button(onClick = onDismiss) {
                         Text("Dismiss")
                     }
@@ -391,7 +406,7 @@ fun DialogBox(
 }
 
 @Composable
-fun ErrorToast(context : Context) {
+fun ErrorToast(context: Context) {
     LaunchedEffect(Unit) {
         Toast.makeText(
             context,
@@ -439,3 +454,11 @@ fun Banner(
     }
 }
 
+
+enum class DialogOption {
+    NONE,
+    SUCCESS,
+    INTERRUPT,
+    DESCRIPTION_SUCCESS,
+    DESCRIPTION_FAIL
+}
