@@ -39,6 +39,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
 import kotlin.math.absoluteValue
+import android.media.MediaPlayer
+import android.os.VibrationEffect
+import android.os.Vibrator
+import appdev.studybuddy.R
+
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
@@ -76,6 +81,8 @@ class SessionVM @Inject  constructor(
 
     private var _wasMobileMoved = MutableStateFlow<Boolean>(false)
     val wasMobileMoved : StateFlow<Boolean> = _wasMobileMoved
+
+    var sessionDescription : String = ""
 
     var interrupt : Boolean = false
 
@@ -181,6 +188,7 @@ class SessionVM @Inject  constructor(
             date = current,
             duration = sessionProperties.value.duration,
             points = points,
+            description = sessionDescription
         )
     }
 
@@ -374,6 +382,14 @@ class SessionVM @Inject  constructor(
                 )
             }
         }
+    }
+    fun alarm(context: Context) {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
+        vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat
+
+        val mediaPlayer = MediaPlayer.create(context, R.raw.alarm)
+        mediaPlayer.start()
     }
 }
 

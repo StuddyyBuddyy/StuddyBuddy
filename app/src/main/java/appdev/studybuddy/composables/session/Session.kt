@@ -1,10 +1,10 @@
-package appdev.studybuddy.composables
+package appdev.studybuddy.composables.session
 
-
+import androidx.compose.runtime.rememberCoroutineScope
 import android.annotation.SuppressLint
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -33,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -42,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
-import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.viewModels.SessionVM
+import kotlinx.coroutines.launch
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -51,26 +49,30 @@ fun SessionScreen(
     navController: NavController,
     viewModel: SessionVM = hiltViewModel()
 ) {
-    StudyBuddyScaffold {
+    val context = LocalContext.current
 
-        var showFailDialog by remember { mutableStateOf(false) }
-        var showSuccessDialog by remember { mutableStateOf(false) }
-        var showErrorToast by remember { mutableStateOf(false) }
+    var showErrorToast by remember { mutableStateOf(false) }
+    var dialogOption by remember { mutableStateOf(DialogOption.NONE) }
 
-        val sessionProperties by viewModel.sessionProperties.collectAsState()
-        val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
-        val isBreak by viewModel.isBreak.collectAsState()
-        val breakNotifier by viewModel.breakNotifier.collectAsState()
+    val sessionProperties by viewModel.sessionProperties.collectAsState()
+    val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
+    val isBreak by viewModel.isBreak.collectAsState()
+    val breakNotifier by viewModel.breakNotifier.collectAsState()
 
-        val isTooDark by viewModel.isTooDark.collectAsState()
-        val isTooLoud by viewModel.isTooLoud.collectAsState()
-        val wasMobileMoved by viewModel.wasMobileMoved.collectAsState()
+    val isTooDark by viewModel.isTooDark.collectAsState()
+    val isTooLoud by viewModel.isTooLoud.collectAsState()
+    val wasMobileMoved by viewModel.wasMobileMoved.collectAsState()
 
-        val imageUrl by viewModel.dogImageUrl.collectAsState()
-        var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    val imageUrl by viewModel.dogImageUrl.collectAsState()
+    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    _root_ide_package_.appdev.studybuddy.composables.StudyBuddyScaffold {
+
 
         BackHandler {
-            showFailDialog = true
+            dialogOption = DialogOption.INTERRUPT
         }
 
         LaunchedEffect(imageUrl) {
@@ -96,8 +98,8 @@ fun SessionScreen(
         val minutesLeft = remainingSeconds / 60
         val secondsLeft = remainingSeconds % 60
 
-        if (remainingSeconds <= 0) {
-            showSuccessDialog = true
+        if (remainingSeconds == 0 && dialogOption == DialogOption.NONE) {
+            dialogOption = DialogOption.DESCRIPTION_SUCCESS
         }
 
         Box(
@@ -177,7 +179,7 @@ fun SessionScreen(
 
                 Button(
                     onClick = {
-                        showFailDialog = true
+                        dialogOption = DialogOption.INTERRUPT
                     }
                 ) {
                     Text("End Session")
@@ -190,146 +192,104 @@ fun SessionScreen(
                     .align(Alignment.TopCenter)
             ) {
                 if (isTooDark) {
-                    Banner(text = "Its to dark, you might wanna turn on some light!")
+                    Banner(text = "Its too dark, you might wanna turn on some light!")
                 }
 
                 if (isTooLoud) {
-                    Banner(text = "Its to loud, you might wanna change your location!")
+                    Banner(text = "Its too loud, you might wanna change your location!")
                 }
             }
 
-            if (showFailDialog) {
-                EndSessionDialogFail(
-                    onConfirm = {
-                        val successful = viewModel.endSession(fail = true)
-                        if (successful) {
-                            navController.popBackStack()
-                            showFailDialog = false
-                        } else {
-                            showErrorToast = true
-                        }
-                    },
-                    onDismiss = { showFailDialog = false }
-                )
-            }
+            when (dialogOption) {
+                DialogOption.NONE -> {}
 
-            if (showSuccessDialog) {
-                LaunchedEffect(Unit) {
-                    viewModel.fetchDogImage()
+                DialogOption.SUCCESS -> {
+                    LaunchedEffect(Unit) {
+                        viewModel.fetchDogImage()
+                    }
+
+                    EndSessionDialogSuccess(
+                        onConfirm = {
+                            val successful = viewModel.endSession()
+                            if (successful) {
+                                navController.popBackStack()
+                                dialogOption = DialogOption.NONE
+                            } else {
+                                showErrorToast = true
+                            }
+                        },
+                        onDownload = {
+                            imageBitmap?.let {
+                                val success = viewModel.saveImageToGallery(
+                                    context = context,
+                                    image = it,
+                                    fileName = "dog_${System.currentTimeMillis()}.jpg"
+                                )
+
+                                Toast.makeText(
+                                    context,
+                                    if (success) "Download successful" else "Download failed",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                        image = imageBitmap
+                    )
                 }
-                val context = LocalContext.current
 
-                EndSessionDialogSuccess(
-                    onConfirm = {
-                        val successful = viewModel.endSession()
-                        if (successful) {
-                            navController.popBackStack()
-                            showSuccessDialog = false
-                        } else {
-                            showErrorToast = true
-                        }
-                    },
-                    onDownload = {
-                        imageBitmap?.let {
-                            val success = viewModel.saveImageToGallery(
-                                context = context,
-                                image = it,
-                                fileName = "dog_${System.currentTimeMillis()}.jpg"
-                            )
+                DialogOption.INTERRUPT -> {
+                    EndSessionDialogFail(
+                        onConfirm = {
+                            dialogOption = DialogOption.DESCRIPTION_FAIL
+                        },
+                        onDismiss = { dialogOption = DialogOption.NONE }
+                    )
+                }
 
-                            Toast.makeText(
-                                context,
-                                if (success) "Download successful" else "Download failed",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    },
-                    image = imageBitmap
-                )
+                DialogOption.DESCRIPTION_FAIL -> {
+                    DescriptionDialog(
+                        onConfirm = {
+                            val successful = viewModel.endSession(fail = true)
+                            if (successful) {
+                                coroutineScope.launch {
+                                    viewModel.alarm(context)
+                                }
+                                navController.popBackStack()
+                                dialogOption = DialogOption.NONE
+                            } else {
+                                showErrorToast = true
+                            }
+                        },
+                        onDismiss = {
+                            dialogOption = DialogOption.NONE
+                        },
+                        sessionVM = viewModel
+                    )
+                }
+
+                DialogOption.DESCRIPTION_SUCCESS -> {
+                    DescriptionDialog(
+                        onConfirm = {
+                            dialogOption = DialogOption.SUCCESS
+                        },
+                        onDismiss = {},
+                        dismissable = false,
+                        sessionVM = viewModel
+                    )
+                }
             }
 
             if (showErrorToast) {
-                ErrorToast()
+                ErrorToast(context)
                 showErrorToast = false
             }
         }
     }
 }
 
-@Composable
-fun EndSessionDialogFail(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    DialogBox {
-        Column (modifier = Modifier.padding(16.dp)) {
-            Text("End Session?")
-            Text("Are you sure you want to end this session early?")
-            Row {
-                Button(onClick = onConfirm){
-                    Text("Confirm")
-                }
-
-                Button(onClick = onDismiss){
-                    Text("Cancel")
-                }
-            }
-        }
-    }
-}
 
 @Composable
-fun EndSessionDialogSuccess(
-    onConfirm: () -> Unit,
-    onDownload: () -> Unit,
-    image : ImageBitmap?
-) {
-    DialogBox {
-        Column (modifier = Modifier.padding(16.dp)) {
-            Text("Congratulations!")
-            Text("Here is a cute Dog Picture for you!")
-            if (image != null) {
-                Image(
-                    bitmap = image,
-                    contentDescription = "Random Dog",
-                    modifier = Modifier.size(300.dp)
-                )
-            } else {
-                Text("Loading...")
-            }
-            Row {
-                Button(onClick = onConfirm) {
-                    Text("Confirm")
-                }
-
-                Spacer(modifier = Modifier.size(12.dp))
-                Button(onClick = onDownload
-                ) {
-                    Text("Download")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DialogBox(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-){
-    Box(
-        modifier = modifier
-            .padding(48.dp)
-            .clip(shape = RoundedCornerShape(20.dp))
-            .background(color = PurpleBackground)
-    ){
-        content()
-    }
-}
-
-@Composable
-fun ErrorToast() {
-    val context = LocalContext.current
+fun ErrorToast(context: Context) {
     LaunchedEffect(Unit) {
         Toast.makeText(
             context,
@@ -350,7 +310,9 @@ fun Banner(
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(8.dp).background(Color.Red),
+            modifier = Modifier
+                .padding(8.dp)
+                .background(Color.Red),
         )
         Row(
             modifier = Modifier
@@ -375,3 +337,11 @@ fun Banner(
     }
 }
 
+
+enum class DialogOption {
+    NONE,
+    SUCCESS,
+    INTERRUPT,
+    DESCRIPTION_SUCCESS,
+    DESCRIPTION_FAIL
+}

@@ -13,7 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,8 +52,10 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
+    var showPassword by remember { mutableStateOf(false) }
+
     var hasPermission by remember { mutableStateOf(false) }
-    var context = LocalContext.current
+    val context = LocalContext.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -57,6 +70,14 @@ fun LoginScreen(
         } else {
             hasPermission = false
             permissionLauncher.launch(RECORD_AUDIO)
+        }
+    }
+
+    val login = {
+        if (userVM.login(email, password)) {
+            navController.navigate("home")
+        } else {
+            failed = true
         }
     }
 
@@ -85,27 +106,56 @@ fun LoginScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("E-Mail Address") }
+                label = { Text("E-Mail Address") },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
-
+            
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") }
+                onValueChange = { newText ->
+                    password = newText
+                },
+                label = {
+                    Text(text = "Password")
+                },
+                visualTransformation = if (showPassword) {
+                    VisualTransformation.None
+                } else {
+
+                    PasswordVisualTransformation()
+
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = { login() }
+                ),
+                trailingIcon = {
+                    if (showPassword) {
+                        IconButton(onClick = { showPassword = false }) {
+                            Icon(
+                                imageVector = Icons.Filled.Visibility,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { showPassword = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.VisibilityOff,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    }
+                }
             )
+
 
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
-                onClick = {
-                    if (userVM.login(email, password)) {
-                        navController.navigate("home")
-                    } else {
-                        failed = true
-                    }
-                }
+                onClick = login
             ) {
                 Text(text = "Login")
             }
@@ -147,15 +197,24 @@ fun RegisterScreen(
     navController: NavController,
     userVM: UserVM = hiltViewModel()
 ) {
+
+    var showPassword by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
-    Scaffold { innerPadding ->
+    val register = {
+        if (userVM.register(email, password, username)) {
+            navController.navigate("home")
+        } else {
+            failed = true
+        }
+    }
+
+    StudyBuddyScaffold {
         Column(
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -178,7 +237,8 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("E-Mail Address") }
+                label = { Text("E-Mail Address") },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
@@ -186,27 +246,54 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username") }
+                label = { Text("Username") },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") }
+                onValueChange = { newText ->
+                    password = newText
+                },
+                label = {
+                    Text(text = "Password")
+                },
+                visualTransformation = if (showPassword) {
+                    VisualTransformation.None
+                } else {
+
+                    PasswordVisualTransformation()
+
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = { register() }
+                ),                trailingIcon = {
+                    if (showPassword) {
+                        IconButton(onClick = { showPassword = false }) {
+                            Icon(
+                                imageVector = Icons.Filled.Visibility,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { showPassword = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.VisibilityOff,
+                                contentDescription = "hide_password"
+                            )
+                        }
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
-                onClick = {
-                    if (userVM.register(email, password, username)) {
-                        navController.navigate("home")
-                    } else {
-                        failed = true
-                    }
-                }
+                onClick = register
             ) {
                 Text(text = "Register")
             }
