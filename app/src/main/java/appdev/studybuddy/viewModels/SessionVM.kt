@@ -39,6 +39,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
 import kotlin.math.absoluteValue
+import android.media.MediaPlayer
+import android.os.VibrationEffect
+import android.os.Vibrator
+import appdev.studybuddy.R
+
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
@@ -373,6 +378,14 @@ class SessionVM @Inject  constructor(
                 )
             }
         }
+    }
+    fun alarm(context: Context) {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
+        vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat
+
+        val mediaPlayer = MediaPlayer.create(context, R.raw.alarm)
+        mediaPlayer.start()
     }
 }
 
