@@ -1,11 +1,10 @@
-package appdev.studybuddy.composables
+package appdev.studybuddy.composables.session
 
 import androidx.compose.runtime.rememberCoroutineScope
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,10 +13,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -25,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
-import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.viewModels.SessionVM
 import kotlinx.coroutines.launch
 
@@ -74,7 +68,7 @@ fun SessionScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    StudyBuddyScaffold {
+    _root_ide_package_.appdev.studybuddy.composables.StudyBuddyScaffold {
 
 
         BackHandler {
@@ -293,117 +287,6 @@ fun SessionScreen(
     }
 }
 
-@Composable
-fun EndSessionDialogFail(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    DialogBox {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("End Session?")
-            Text("Are you sure you want to end this session early?")
-            Row {
-                Button(onClick = onConfirm) {
-                    Text("Confirm")
-                }
-
-                Button(onClick = onDismiss) {
-                    Text("Cancel")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun EndSessionDialogSuccess(
-    onConfirm: () -> Unit,
-    onDownload: () -> Unit,
-    image: ImageBitmap?
-) {
-    DialogBox {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Congratulations!")
-            Text("Here is a cute Dog Picture for you!")
-            if (image != null) {
-                Image(
-                    bitmap = image,
-                    contentDescription = "Random Dog",
-                    modifier = Modifier.size(300.dp)
-                )
-            } else {
-                Text("Loading...")
-            }
-            Row {
-                Button(onClick = onConfirm) {
-                    Text("Confirm")
-                }
-
-                Spacer(modifier = Modifier.size(12.dp))
-                Button(
-                    onClick = onDownload
-                ) {
-                    Text("Download")
-                }
-            }
-        }
-    }
-}
-
-@SuppressLint("StateFlowValueCalledInComposition")
-@Composable
-fun DescriptionDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-    sessionVM: SessionVM,
-    dismissable: Boolean = true
-) {
-    var text by remember { mutableStateOf("") }
-
-    DialogBox {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Please Enter Description for this Session!")
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 200.dp),
-                value = text,
-                onValueChange = { text = it }
-            )
-            Row(modifier = Modifier.padding(16.dp)) {
-                Button(
-                    onClick = {
-                        onConfirm()
-                        sessionVM.sessionDescription = text
-                    }
-                ) {
-                    Text("Confirm")
-                }
-
-                if (dismissable) {
-                    Button(onClick = onDismiss) {
-                        Text("Dismiss")
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DialogBox(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .padding(48.dp)
-            .clip(shape = RoundedCornerShape(20.dp))
-            .background(color = PurpleBackground)
-    ) {
-        content()
-    }
-}
 
 @Composable
 fun ErrorToast(context: Context) {

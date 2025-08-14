@@ -10,6 +10,7 @@ import appdev.studybuddy.ExampleDBScreen
 import appdev.studybuddy.models.DAO
 import appdev.studybuddy.viewModels.*
 import appdev.studybuddy.composables.home.HomeScreen
+import appdev.studybuddy.composables.session.SessionScreen
 
 @Composable
 fun NavSetup() {
