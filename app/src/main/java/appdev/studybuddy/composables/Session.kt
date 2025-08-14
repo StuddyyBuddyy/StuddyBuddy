@@ -391,8 +391,11 @@ fun Banner(
     }
 }
 
-suspend fun alarm(context: Context) {
+fun alarm(context: Context) {
     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
         vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat
+
+    val mediaPlayer = MediaPlayer.create(context, R.raw.alarm)
+    mediaPlayer.start()
 }
