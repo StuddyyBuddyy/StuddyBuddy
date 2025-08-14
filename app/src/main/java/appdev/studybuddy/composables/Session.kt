@@ -14,12 +14,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -267,7 +265,8 @@ fun SessionScreen(
                     onConfirm = {
                         showSuccessDialog = true
                     },
-                    onDismiss = {}
+                    onDismiss = {},
+                    sessionVM = viewModel
                 )
             }
 
@@ -336,10 +335,12 @@ fun EndSessionDialogSuccess(
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun DescriptionDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    sessionVM: SessionVM,
     dismissable : Boolean = false
 ){
     var text by remember { mutableStateOf("") }
@@ -356,7 +357,10 @@ fun DescriptionDialog(
             )
             Row(modifier = Modifier.padding(16.dp)) {
                 Button(
-                    onClick = onConfirm
+                    onClick = {
+                        onConfirm()
+                        sessionVM.sessionDescription = text
+                    }
                 ) {
                     Text("Confirm")
                 }

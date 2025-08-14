@@ -82,6 +82,8 @@ class SessionVM @Inject  constructor(
     private var _wasMobileMoved = MutableStateFlow<Boolean>(false)
     val wasMobileMoved : StateFlow<Boolean> = _wasMobileMoved
 
+    var sessionDescription : String = ""
+
     var interrupt : Boolean = false
 
     lateinit var user : User
