@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +60,7 @@ fun SessionScreen(
     var showFailDialog by remember { mutableStateOf(false) }
     var showSuccessDialog by remember { mutableStateOf(false) }
     var showErrorToast by remember { mutableStateOf(false) }
+    var showDescriptionDialog by remember { mutableStateOf(false) }
 
     val sessionProperties by viewModel.sessionProperties.collectAsState()
     val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
@@ -104,7 +107,7 @@ fun SessionScreen(
         val secondsLeft = remainingSeconds % 60
 
         if (remainingSeconds <= 0) {
-            showSuccessDialog = true
+            showDescriptionDialog = true
         }
 
         Box(
@@ -197,16 +200,15 @@ fun SessionScreen(
                     .align(Alignment.TopCenter)
             ) {
                 if (isTooDark) {
-                    Banner(text = "Its to dark, you might wanna turn on some light!")
+                    Banner(text = "Its too dark, you might wanna turn on some light!")
                 }
 
                 if (isTooLoud) {
-                    Banner(text = "Its to loud, you might wanna change your location!")
+                    Banner(text = "Its too loud, you might wanna change your location!")
                 }
             }
 
             if (showFailDialog) {
-
                 EndSessionDialogFail(
                     onConfirm = {
                         val successful = viewModel.endSession(fail = true)
@@ -228,7 +230,6 @@ fun SessionScreen(
                 LaunchedEffect(Unit) {
                     viewModel.fetchDogImage()
                 }
-                val context = LocalContext.current
 
                 EndSessionDialogSuccess(
                     onConfirm = {
@@ -256,6 +257,16 @@ fun SessionScreen(
                         }
                     },
                     image = imageBitmap
+                )
+            }
+
+            if (showDescriptionDialog && !showSuccessDialog){
+                DescriptionDialog(
+                    onConfirm = {
+                        showSuccessDialog = true
+                    },
+                    onDismiss = {},
+                    sessionVM = viewModel
                 )
             }
 
@@ -318,6 +329,46 @@ fun EndSessionDialogSuccess(
                     onClick = onDownload
                 ) {
                     Text("Download")
+                }
+            }
+        }
+    }
+}
+
+@SuppressLint("StateFlowValueCalledInComposition")
+@Composable
+fun DescriptionDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    sessionVM: SessionVM,
+    dismissable : Boolean = false
+){
+    var text by remember { mutableStateOf("") }
+
+    DialogBox {
+        Column (modifier = Modifier.padding(16.dp)){
+            Text("Please Enter Description for this Session!")
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min=200.dp),
+                value = text,
+                onValueChange = {text = it}
+            )
+            Row(modifier = Modifier.padding(16.dp)) {
+                Button(
+                    onClick = {
+                        onConfirm()
+                        sessionVM.sessionDescription = text
+                    }
+                ) {
+                    Text("Confirm")
+                }
+
+                if (dismissable){
+                    Button(onClick = onDismiss) {
+                        Text("Dismiss")
+                    }
                 }
             }
         }
