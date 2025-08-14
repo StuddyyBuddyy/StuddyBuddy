@@ -3,9 +3,6 @@ package appdev.studybuddy.composables
 import androidx.compose.runtime.rememberCoroutineScope
 import android.annotation.SuppressLint
 import android.content.Context
-import android.media.MediaPlayer
-import android.os.VibrationEffect
-import android.os.Vibrator
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -215,7 +212,7 @@ fun SessionScreen(
                         val successful = viewModel.endSession(fail = true)
                         if (successful) {
                             coroutineScope.launch {
-                                alarm(context)
+                                viewModel.alarm(context)
                             }
                             navController.popBackStack()
                             showFailDialog = false
@@ -391,11 +388,3 @@ fun Banner(
     }
 }
 
-fun alarm(context: Context) {
-    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
-        vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat
-
-    val mediaPlayer = MediaPlayer.create(context, R.raw.alarm)
-    mediaPlayer.start()
-}
