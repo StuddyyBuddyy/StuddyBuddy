@@ -188,6 +188,7 @@ class SessionVM @Inject  constructor(
             date = current,
             duration = sessionProperties.value.duration,
             points = points,
+            description = sessionDescription
         )
     }
 
