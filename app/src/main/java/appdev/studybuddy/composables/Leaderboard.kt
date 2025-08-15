@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,8 +36,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
+import appdev.studybuddy.models.User
 import appdev.studybuddy.ui.theme.Purple40
 import appdev.studybuddy.ui.theme.PurpleBackground
+import appdev.studybuddy.ui.theme.PurpleBackground2
 import appdev.studybuddy.ui.theme.PurpleButton
 import appdev.studybuddy.viewModels.DataVM
 import appdev.studybuddy.viewModels.UserVM
@@ -120,7 +123,7 @@ fun LeaderboardScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(leaderboard.toList()) { (username, points) ->
-                        LeaderboardRow(username, points)
+                        LeaderboardRow(username, points, userVM.currentUser?.username ?:"")
                     }
                 }
             }
@@ -130,10 +133,15 @@ fun LeaderboardScreen(
 
 
 @Composable
-fun LeaderboardRow(username: String, points: Int) {
+fun LeaderboardRow(username: String, points: Int, currentUsername: String) {
+
+    val isCurrentUser = username == currentUsername
+    val backgroundColor = if (isCurrentUser) PurpleBackground2 else PurpleBackground
+    val fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.Normal
+
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = PurpleBackground),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -148,11 +156,13 @@ fun LeaderboardRow(username: String, points: Int) {
             Text(
                 text = username,
                 style = MaterialTheme.typography.bodyLarge,
+                fontWeight = fontWeight,
                 color = Purple40
             )
             Text(
                 text = "$points Punkte",
                 style = MaterialTheme.typography.bodyLarge,
+                fontWeight = fontWeight,
                 color = Purple40
             )
         }
