@@ -1,6 +1,5 @@
 package appdev.studybuddy.composables.home
 
-import LeaderboardRow
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -31,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,7 +48,8 @@ import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.ui.theme.Purple40
 import appdev.studybuddy.ui.theme.PurpleBackground
-import appdev.studybuddy.ui.theme.PurpleButton
+import appdev.studybuddy.ui.theme.PurpleBackground2
+import appdev.studybuddy.ui.theme.PurpleDarkText
 import appdev.studybuddy.ui.theme.logOutRed
 import appdev.studybuddy.viewModels.DataVM
 import appdev.studybuddy.viewModels.SessionVM
@@ -78,9 +80,11 @@ fun HomeScreen(
         }
 
         var personalScoreboard: Map<String, Int> by remember { mutableStateOf(emptyMap()) }
+        var userTotalPoints: Int by remember { mutableIntStateOf(0) }
         LaunchedEffect(userVM.currentUser) {
             userVM.currentUser?.let { user ->
                 personalScoreboard = dataVM.sortSessionPoints(user)
+                userTotalPoints = dataVM.addSessionPoints(user)
             }
         }
 
@@ -111,7 +115,7 @@ fun HomeScreen(
                     displayLogoutDialog = true
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PurpleButton,
+                    containerColor = Purple40,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(15.dp),
@@ -126,7 +130,7 @@ fun HomeScreen(
                     navController.navigate("leaderboard")
                 },
                 modifier = Modifier
-                    .background(PurpleButton, shape = RoundedCornerShape(15.dp))
+                    .background(Purple40, shape = RoundedCornerShape(15.dp))
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.trophyicon),
@@ -147,14 +151,14 @@ fun HomeScreen(
 
             Text(
                 text = "Hello ${userVM.currentUser?.username}!",
-                color = PurpleButton,
+                color = Purple40,
                 fontSize = 30.sp,
                 fontStyle = MaterialTheme.typography.bodyLarge.fontStyle
             )
 
             Spacer(modifier = Modifier.padding(10.dp))
-
-            if(personalScoreboard.isEmpty()){
+            
+            if(personalScoreboard.isEmpty() ){
                 val composition by rememberLottieComposition(
                     LottieCompositionSpec.RawRes(R.raw.loadingbook)
                 )
@@ -174,6 +178,35 @@ fun HomeScreen(
                 }
 
             } else {
+
+                Spacer(modifier = Modifier.padding(10.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                        .background(
+                            color = PurpleBackground2,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(16.dp), // Innenabstand
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Your total score:",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = PurpleDarkText
+                    )
+                    Text(
+                        text = "$userTotalPoints points",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = PurpleDarkText
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.padding(10.dp))
 
@@ -197,7 +230,7 @@ fun HomeScreen(
                         navController.navigate("session")
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = PurpleButton,
+                        containerColor = Purple40,
                         contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(15.dp)
@@ -258,7 +291,7 @@ fun LogoutDialog(
                     shape = RoundedCornerShape(15.dp)
                 )
                 {
-                    Text("No, Cancel", color = PurpleButton)
+                    Text("No, Cancel", color = Purple40)
                 }
             },
             shape = RoundedCornerShape(12.dp),
@@ -269,6 +302,7 @@ fun LogoutDialog(
 
 @Composable
 fun PersonalScoreboardRow(sessionDate: String, points: Int){
+
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = PurpleBackground),
@@ -289,7 +323,7 @@ fun PersonalScoreboardRow(sessionDate: String, points: Int){
                 color = Purple40
             )
             Text(
-                text = "$points Punkte",
+                text = "$points points",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Purple40
             )

@@ -68,6 +68,8 @@ fun SessionScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
+
+    /*
     _root_ide_package_.appdev.studybuddy.composables.StudyBuddyScaffold {
 
 
@@ -285,6 +287,7 @@ fun SessionScreen(
             }
         }
     }
+    */
 }
 
 

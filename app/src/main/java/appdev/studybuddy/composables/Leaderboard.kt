@@ -36,11 +36,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
-import appdev.studybuddy.models.User
 import appdev.studybuddy.ui.theme.Purple40
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleBackground2
-import appdev.studybuddy.ui.theme.PurpleButton
+import appdev.studybuddy.ui.theme.PurpleDarkText
 import appdev.studybuddy.viewModels.DataVM
 import appdev.studybuddy.viewModels.UserVM
 import com.airbnb.lottie.compose.LottieAnimation
@@ -72,7 +71,7 @@ fun LeaderboardScreen(
                         navController.popBackStack()
                     },
                     modifier = Modifier
-                        .background(PurpleButton, shape = RoundedCornerShape(15.dp))
+                        .background(Purple40, shape = RoundedCornerShape(15.dp))
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -138,6 +137,7 @@ fun LeaderboardRow(username: String, points: Int, currentUsername: String) {
     val isCurrentUser = username == currentUsername
     val backgroundColor = if (isCurrentUser) PurpleBackground2 else PurpleBackground
     val fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.Normal
+    val color = if (isCurrentUser) PurpleDarkText else Purple40
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -157,13 +157,13 @@ fun LeaderboardRow(username: String, points: Int, currentUsername: String) {
                 text = username,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = fontWeight,
-                color = Purple40
+                color = color
             )
             Text(
                 text = "$points Punkte",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = fontWeight,
-                color = Purple40
+                color = color
             )
         }
     }

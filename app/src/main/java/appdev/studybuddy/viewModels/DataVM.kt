@@ -35,5 +35,4 @@ class DataVM : ViewModel() {
         Log.d("SessionPoints", sessionPoints.toString())
         return sessionPoints.toList().sortedByDescending { (_, value) -> value }.toMap()
     }
-
 }
