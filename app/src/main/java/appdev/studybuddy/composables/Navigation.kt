@@ -9,16 +9,14 @@ import androidx.navigation.compose.rememberNavController
 import appdev.studybuddy.ExampleDBScreen
 import appdev.studybuddy.models.DAO
 import appdev.studybuddy.viewModels.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import appdev.studybuddy.composables.home.HomeScreen
+import appdev.studybuddy.composables.session.SessionScreen
 
 @Composable
 fun NavSetup() {
     val navController = rememberNavController()
 
-    val dataVM: DataVM = viewModel()
     val sessionVM : SessionVM = hiltViewModel()
-    val homeVM: HomeVM = viewModel()
     val userVM: UserVM = hiltViewModel()
 
     val startDestination = if (userVM.autoLogin()) "home" else "login"
@@ -29,13 +27,23 @@ fun NavSetup() {
     )
     {
         composable("login") {
-            LoginScreen(navController = navController)
+            LoginScreen(
+                navController = navController,
+                userVM = userVM
+            )
         }
         composable("register") {
-            RegisterScreen(navController = navController)
+            RegisterScreen(
+                navController = navController,
+                userVM = userVM
+            )
         }
         composable("home") {
-            HomeScreen(navController = navController)
+            HomeScreen(
+                navController = navController,
+                userVM = userVM,
+                sessionVM = sessionVM
+            )
         }
         composable("session") {
             SessionScreen(
@@ -48,7 +56,9 @@ fun NavSetup() {
         }
 
         composable("leaderboard") {
-            LeaderboardScreen(navController = navController)
+            LeaderboardScreen(
+                navController = navController
+            )
         }
 
     }

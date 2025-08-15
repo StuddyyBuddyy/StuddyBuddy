@@ -50,6 +50,7 @@ import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleButton
 import appdev.studybuddy.ui.theme.logOutRed
 import appdev.studybuddy.viewModels.DataVM
+import appdev.studybuddy.viewModels.SessionVM
 import appdev.studybuddy.viewModels.UserVM
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -60,9 +61,10 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 
 @Composable
 fun HomeScreen(
-                navController: NavController,
-                userVM: UserVM = hiltViewModel(),
-                dataVM: DataVM = viewModel()
+    navController: NavController,
+    userVM: UserVM = hiltViewModel(),
+    sessionVM: SessionVM = hiltViewModel(),
+    dataVM: DataVM = viewModel()
 ) {
     StudyBuddyScaffold {
         var displaySessionDialog by remember { mutableStateOf(false) }
@@ -70,7 +72,8 @@ fun HomeScreen(
 
         if (displaySessionDialog) {
             SessionPropertiesDialog(
-                onDismiss = { displaySessionDialog = false }
+                onDismiss = { displaySessionDialog = false },
+                viewModel = sessionVM
             )
         }
 
