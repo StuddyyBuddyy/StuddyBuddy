@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.fragment)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.lottie.compose)
 
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
