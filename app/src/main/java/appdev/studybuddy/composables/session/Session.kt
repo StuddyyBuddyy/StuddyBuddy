@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
+import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.viewModels.SessionVM
 import kotlinx.coroutines.launch
 
@@ -68,7 +69,7 @@ fun SessionScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    _root_ide_package_.appdev.studybuddy.composables.StudyBuddyScaffold {
+    StudyBuddyScaffold {
 
 
         BackHandler {
