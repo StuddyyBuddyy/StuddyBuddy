@@ -44,6 +44,7 @@ import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.ui.theme.Pink40
 import appdev.studybuddy.ui.theme.Pink80
+import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.viewModels.SessionVM
 import kotlinx.coroutines.launch
 
@@ -304,6 +305,7 @@ fun SessionScreen(
             }
         }
     }
+
 }
 
 

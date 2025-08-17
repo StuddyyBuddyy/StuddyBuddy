@@ -1,6 +1,7 @@
 [versions]
 agp = "8.9.2"
 datastorePreferences = "1.1.7"
+dotlottieAndroid = "0.5.0"
 hiltAndroid = "2.57"
 hiltNavigationFragment = "1.2.0"
 jbcrypt = "0.4"
@@ -18,6 +19,7 @@ lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
 composeBom = "2025.07.00"
 lifecycleViewmodelCompose = "2.9.2"
+lottieCompose = "6.1.0"
 materialIconsExtended = "1.7.8"
 mlSpeechSemanticsSounddectSdkVersion = "2.1.0.300"
 navigationCompose = "2.9.2"
@@ -33,6 +35,7 @@ androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltNa
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+dotlottie-android = { module = "com.github.LottieFiles:dotlottie-android", version.ref = "dotlottieAndroid" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 hms-ml-speech-semantics-sounddect-sdk = { module = "com.huawei.hms:ml-speech-semantics-sounddect-sdk", version.ref = "mlSpeechSemanticsSounddectSdkVersion" }
@@ -56,6 +59,7 @@ ktor-client-content-negotiation-v235 = { module = "io.ktor:ktor-client-content-n
 ktor-client-core-v235 = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCoreVersion" }
 ktor-serialization-kotlinx-json-v235 = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJsonVersion" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidx-hilt-compiler" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 ml-speech-semantics-sounddect-model = { module = "com.huawei.hms:ml-speech-semantics-sounddect-model", version.ref = "mlSpeechSemanticsSounddectSdkVersion" }
 
 [plugins]
