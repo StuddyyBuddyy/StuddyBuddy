@@ -63,7 +63,6 @@ fun SessionPropertiesDialog(
 
     //var numbers = remember { (0..100).toList()}
     //var listState = rememberLazyListState(initialFirstVisibleItemIndex = sessionProperties.numBreaks)
-    Log.d("NumBreaks","${sessionProperties.numBreaks}")
 
     val durationTimerInput = rememberTimePickerState(
         initialHour = viewModel.getHours(),

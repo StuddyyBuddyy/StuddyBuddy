@@ -43,17 +43,20 @@ import android.media.MediaPlayer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import appdev.studybuddy.R
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
     private val userPreferences: UserPreferences,
-    private val sensorRepository: SensorRepository
+    private val sensorRepository: SensorRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val BRIGHTNESS_THRESHOLD = 10
-    private val SOUND_THRESHOLD = 500
+    private val SOUND_THRESHOLD = 750
     private val MOVEMENT_TRHESOLD = 0.05 //Grenzwert wenn Handy mehr als x% bewegt wird
     private val BASE_ACCELERATION = 9.81
 
@@ -138,8 +141,6 @@ class SessionVM @Inject  constructor(
         efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak) else sessionProperties.value.duration
         sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
 
-        Log.d("Segment","$efficientTime   ,, $sessionTimeSegment")
-
         while (overallElapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
             _overallElapsedSeconds.value++
@@ -148,6 +149,7 @@ class SessionVM @Inject  constructor(
                 _segmentElapsedSeconds.value++
 
                 if (_segmentElapsedSeconds.value >= sessionTimeSegment) {
+                    notifyBreak()
                     _isBreak.value = true
                     _segmentElapsedSeconds.value = 0
                 }
@@ -395,6 +397,19 @@ class SessionVM @Inject  constructor(
             }
         }
     }
+
+
+    /**
+     * Sound wenn eine Pause beginnt.
+     */
+    fun notifyBreak(){
+        val mediaPlayer = MediaPlayer.create(context, R.raw.simple_breaksound)
+        mediaPlayer.start()
+    }
+
+    /**
+     * Alarm Vibration + Sound wenn eine Session abgebrochen wird
+     */
     fun alarm(context: Context) {
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)

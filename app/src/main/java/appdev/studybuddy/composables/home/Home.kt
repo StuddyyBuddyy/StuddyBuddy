@@ -115,10 +115,6 @@ fun HomeScreen(
                 onClick = {
                     displayLogoutDialog = true
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Purple40,
-                    contentColor = Color.White
-                ),
                 shape = RoundedCornerShape(15.dp),
             ) {
                 Text(text = "Logout")
@@ -231,10 +227,6 @@ fun HomeScreen(
                     onClick = {
                         navController.navigate("session")
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Purple40,
-                        contentColor = Color.White
-                    ),
                     shape = RoundedCornerShape(15.dp)
                 ) {
                     Text(text = "Start Session")

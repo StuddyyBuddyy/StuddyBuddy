@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -96,23 +97,6 @@ fun SessionScreen(
             }
         }
 
-        //Timer Berechnungen
-        val progress = overallElapsedSeconds / sessionProperties.duration.toFloat()
-
-        val overallRemainingSeconds = sessionProperties.duration - overallElapsedSeconds
-        val overallHoursLeft = overallRemainingSeconds / 3600
-        val overallMinutesLeft = overallRemainingSeconds % 3600 / 60
-        val overallSecondsLeft = overallRemainingSeconds % 60
-
-        val segmentRemainingSeconds = viewModel.sessionTimeSegment - segmentElapsedSeconds
-        val segmentHoursLeft = segmentRemainingSeconds / 3600
-        val segmentMinutesLeft = segmentRemainingSeconds % 3600 / 60
-        val segmentSecondsLeft = segmentRemainingSeconds % 60
-
-        if (overallRemainingSeconds == 0 && dialogOption == DialogOption.NONE) {
-            dialogOption = DialogOption.DESCRIPTION_SUCCESS
-        }
-
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -122,6 +106,23 @@ fun SessionScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                //Timer Berechnungen
+                val progress = overallElapsedSeconds / sessionProperties.duration.toFloat()
+
+                val overallRemainingSeconds = sessionProperties.duration - overallElapsedSeconds
+                val overallHoursLeft = overallRemainingSeconds / 3600
+                val overallMinutesLeft = overallRemainingSeconds % 3600 / 60
+                val overallSecondsLeft = overallRemainingSeconds % 60
+
+                val segmentRemainingSeconds = if(isBreak) (sessionProperties.durationBreak - segmentElapsedSeconds) else (viewModel.sessionTimeSegment - segmentElapsedSeconds)
+                val segmentHoursLeft = segmentRemainingSeconds / 3600
+                val segmentMinutesLeft = segmentRemainingSeconds % 3600 / 60
+                val segmentSecondsLeft = segmentRemainingSeconds % 60
+
+                if (overallRemainingSeconds == 0 && dialogOption == DialogOption.NONE) {
+                    dialogOption = DialogOption.DESCRIPTION_SUCCESS
+                }
+
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
@@ -129,7 +130,7 @@ fun SessionScreen(
                         painter = painterResource(id = R.drawable.baseline_light_mode_24),
                         contentDescription = "Light Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = if (isTooDark) Pink40 else Pink80,
+                        tint = if (isTooDark && !isBreak) Pink40 else Pink80,
                     )
 
                     Spacer(Modifier.padding(10.dp))
@@ -138,7 +139,7 @@ fun SessionScreen(
                         painter = painterResource(id = R.drawable.speaker_filled_audio),
                         contentDescription = "Sound Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = if (isTooLoud) Pink40 else Pink80,
+                        tint = if (isTooLoud && !isBreak) Pink40 else Pink80,
                     )
                 }
 
@@ -156,9 +157,12 @@ fun SessionScreen(
                     )
 
                     Text(
-                        text = String.format("%02d:%02d:%02d", segmentHoursLeft, segmentMinutesLeft, segmentSecondsLeft),
+                        text = String.format("${if (isBreak) "Break Segment" else "Learn Segment"}\n" +
+                                "%02d:%02d:%02d", segmentHoursLeft, segmentMinutesLeft, segmentSecondsLeft),
+                        textAlign = TextAlign.Center,
                         color = if (isBreak) Pink40 else Pink80,
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 25.sp
                     )
                 }
 
@@ -185,11 +189,11 @@ fun SessionScreen(
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
             ) {
-                if (isTooDark) {
+                if (isTooDark && !isBreak) {
                     Banner(text = "Its too dark, you might wanna turn on some light!")
                 }
 
-                if (isTooLoud) {
+                if (isTooLoud && !isBreak) {
                     Banner(text = "Its too loud, you might wanna change your location!")
                 }
             }
