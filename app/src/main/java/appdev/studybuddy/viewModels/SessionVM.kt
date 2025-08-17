@@ -42,6 +42,7 @@ import kotlin.math.absoluteValue
 import android.media.MediaPlayer
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import appdev.studybuddy.R
 
 
@@ -50,8 +51,6 @@ class SessionVM @Inject  constructor(
     private val userPreferences: UserPreferences,
     private val sensorRepository: SensorRepository
 ) : ViewModel() {
-
-    private val MIN_NOTIFICATION_TIME = 5
 
     private val BRIGHTNESS_THRESHOLD = 10
     private val SOUND_THRESHOLD = 500
@@ -64,14 +63,17 @@ class SessionVM @Inject  constructor(
     private var _isInvalidBreak = MutableStateFlow<Boolean>(false) //Indikator ob Pausen valid sind im Verhältnis zur Session-Dauer
     val isInvalidBreak: StateFlow<Boolean> = _isInvalidBreak
 
-    private var _elapsedSeconds = MutableStateFlow<Int>(0)
-    val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
+    private var _overallElapsedSeconds = MutableStateFlow<Int>(0)
+    val overallElapsedSeconds: StateFlow<Int> = _overallElapsedSeconds
+
+    private var _segmentElapsedSeconds = MutableStateFlow<Int>(0)
+    val segmentElapsedSeconds: StateFlow<Int> = _segmentElapsedSeconds
+
+    var efficientTime: Int = 0
+    var sessionTimeSegment: Int = 0
 
     private var _isBreak = MutableStateFlow<Boolean>(false)
     val isBreak: StateFlow<Boolean> = _isBreak
-
-    private var _breakNotifier = MutableStateFlow<Int>(0)
-    val breakNotifier : StateFlow<Int> = _breakNotifier
 
     private var _isTooDark = MutableStateFlow<Boolean>(false)
     val isTooDark : StateFlow<Boolean> = _isTooDark
@@ -79,8 +81,16 @@ class SessionVM @Inject  constructor(
     private var _isTooLoud = MutableStateFlow<Boolean>(false)
     val isTooLoud : StateFlow<Boolean> =  _isTooLoud
 
-    private var _wasMobileMoved = MutableStateFlow<Boolean>(false)
-    val wasMobileMoved : StateFlow<Boolean> = _wasMobileMoved
+    private var _wasMobileMoved = MutableStateFlow<Int>(0)
+    val wasMobileMoved : StateFlow<Int> = _wasMobileMoved
+
+    //For Debug:
+    private var _lightLevel = MutableStateFlow<Float>(0f)
+    val lightLevel : StateFlow<Float> = _lightLevel
+    private var _soundAmplitude = MutableStateFlow<Int?>(0)
+    val soundAmplitude : StateFlow<Int?> = _soundAmplitude
+    private var _movementMagnitude = MutableStateFlow<Float>(0f)
+    val movementMagnitude : StateFlow<Float> = _movementMagnitude
 
     var sessionDescription : String = ""
 
@@ -100,52 +110,54 @@ class SessionVM @Inject  constructor(
                 sensorRepository.soundAmplitude,
                 sensorRepository.accelerationMagnitude
             ) { lightLevel, soundAmplitude, accelerationMagnitude ->
+
+                _lightLevel.value = lightLevel //for Debug
+                _soundAmplitude.value = soundAmplitude
+                _movementMagnitude.value = accelerationMagnitude
+
                 _isTooDark.value = lightLevel < BRIGHTNESS_THRESHOLD
                 soundAmplitude?.let { _isTooLoud.value = it > SOUND_THRESHOLD }
-                _wasMobileMoved.value = (BASE_ACCELERATION-accelerationMagnitude).absoluteValue/100 > MOVEMENT_TRHESOLD
+
+                if((BASE_ACCELERATION-accelerationMagnitude).absoluteValue/100 > MOVEMENT_TRHESOLD){
+                    _wasMobileMoved.value++
+                }
+
             }.collect()
+
         }
     }
 
     /**
      * Starte den Timer im SessionScreen. Trackt dabei Pausen (wechselt isBreak)
-     * MIN_NOTIFICATION_TIME gibt an wieviele Sekunden vor einer Pause der Nutzer benachrichtigt wird.
      */
     suspend fun startTimer(){
         interrupt = false
 
-        var efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak)
-                            else sessionProperties.value.duration
-        var sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
-
         _isBreak.value = false
-        var sessionTimeCounter = 0
-        var breakTimeCounter = 0
 
-        while (elapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
+        efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak) else sessionProperties.value.duration
+        sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
+
+        Log.d("Segment","$efficientTime   ,, $sessionTimeSegment")
+
+        while (overallElapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
-            _elapsedSeconds.value++
+            _overallElapsedSeconds.value++
 
             if (!_isBreak.value) { //keine Pause
-                sessionTimeCounter++
+                _segmentElapsedSeconds.value++
 
-                if(sessionTimeCounter>=sessionTimeSegment-MIN_NOTIFICATION_TIME && elapsedSeconds.value < sessionProperties.value.duration-MIN_NOTIFICATION_TIME){
-                    _breakNotifier.value = sessionTimeSegment-sessionTimeCounter
-                }
-
-                if (sessionTimeCounter >= sessionTimeSegment) {
+                if (_segmentElapsedSeconds.value >= sessionTimeSegment) {
                     _isBreak.value = true
-                    sessionTimeCounter = 0
+                    _segmentElapsedSeconds.value = 0
                 }
 
             } else { //in einer Pause
-                breakTimeCounter++
+                _segmentElapsedSeconds.value++
 
-                //todo maybe sensor usage disablen während Pause?
-
-                if (breakTimeCounter >= sessionProperties.value.durationBreak) {
+                if (_segmentElapsedSeconds.value >= sessionProperties.value.durationBreak) {
                     _isBreak.value = false
-                    breakTimeCounter = 0
+                    _segmentElapsedSeconds.value = 0
                 }
             }
 
@@ -166,12 +178,12 @@ class SessionVM @Inject  constructor(
 
         if (successful){
             interrupt = true
-            _elapsedSeconds.value = 0
+            _overallElapsedSeconds.value = 0
         }
 
         _isTooDark.value = false
         _isTooLoud.value = false
-        _wasMobileMoved.value = false
+        _wasMobileMoved.value = 0
 
         return successful
     }
@@ -317,7 +329,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setElapsedSeconds(elapsedSeconds: Int){
-        _elapsedSeconds.value = elapsedSeconds
+        _overallElapsedSeconds.value = elapsedSeconds
     }
 
     fun setUseSoundSensor(useSoundSensor: Boolean){
@@ -359,7 +371,7 @@ class SessionVM @Inject  constructor(
 
     fun setNumBreaks(numBreaks: String){
 
-        if(sessionProperties.value.duration/2<=numBreaks.toInt()*sessionProperties.value.durationBreak || numBreaks.isEmpty()){
+        if(numBreaks.isEmpty()||sessionProperties.value.duration/2<=numBreaks.toInt()*sessionProperties.value.durationBreak || numBreaks.isEmpty()){
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false

@@ -146,7 +146,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Settings,
-                        contentDescription = "Session Settings"
+                        contentDescription = "Session Settings",
                     )
 
                 }
