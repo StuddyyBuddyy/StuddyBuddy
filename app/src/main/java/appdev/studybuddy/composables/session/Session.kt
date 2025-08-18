@@ -49,7 +49,7 @@ import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.viewModels.SessionVM
 import kotlinx.coroutines.launch
 
-@SuppressLint("DefaultLocale")
+@SuppressLint("DefaultLocale", "CoroutineCreationDuringComposition")
 @Composable
 fun SessionScreen(
     navController: NavController,
@@ -68,6 +68,10 @@ fun SessionScreen(
     val isTooDark by viewModel.isTooDark.collectAsState()
     val isTooLoud by viewModel.isTooLoud.collectAsState()
     val wasMobileMoved by viewModel.wasMobileMoved.collectAsState()
+
+    if(wasMobileMoved==2){
+        dialogOption = DialogOption.MOVED
+    }
 
     val imageUrl by viewModel.dogImageUrl.collectAsState()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -276,7 +280,7 @@ fun SessionScreen(
                             val successful = viewModel.endSession(fail = true)
                             if (successful) {
                                 coroutineScope.launch {
-                                    viewModel.alarm(context)
+                                    viewModel.alarm()
                                 }
                                 navController.popBackStack()
                                 dialogOption = DialogOption.NONE
@@ -300,6 +304,19 @@ fun SessionScreen(
                         dismissable = false,
                         sessionVM = viewModel
                     )
+                }
+
+                DialogOption.MOVED -> {
+                    val successful = viewModel.endSession(fail = true)
+                    if (successful) {
+                        coroutineScope.launch {
+                            viewModel.alarm()
+                        }
+                        navController.popBackStack()
+                        dialogOption = DialogOption.NONE
+                    } else {
+                        showErrorToast = true
+                    }
                 }
             }
 
@@ -368,5 +385,6 @@ enum class DialogOption {
     SUCCESS,
     INTERRUPT,
     DESCRIPTION_SUCCESS,
-    DESCRIPTION_FAIL
+    DESCRIPTION_FAIL,
+    MOVED
 }

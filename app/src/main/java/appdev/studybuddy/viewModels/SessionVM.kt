@@ -57,8 +57,8 @@ class SessionVM @Inject  constructor(
 
     private val BRIGHTNESS_THRESHOLD = 10
     private val SOUND_THRESHOLD = 750
-    private val MOVEMENT_TRHESOLD = 0.05 //Grenzwert wenn Handy mehr als x% bewegt wird
-    private val BASE_ACCELERATION = 9.81
+    private val MOVEMENT_TRHESOLD = 1f //Grenzwert wenn Handy mehr als x bewegt wird/ bzw. von BASE_ACCELERATION abweicht
+    private val BASE_ACCELERATION = 9.81f
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
@@ -111,22 +111,28 @@ class SessionVM @Inject  constructor(
             combine(
                 sensorRepository.lightLevel,
                 sensorRepository.soundAmplitude,
-                sensorRepository.accelerationMagnitude
-            ) { lightLevel, soundAmplitude, accelerationMagnitude ->
+            ) { lightLevel, soundAmplitude ->
 
                 _lightLevel.value = lightLevel //for Debug
                 _soundAmplitude.value = soundAmplitude
-                _movementMagnitude.value = accelerationMagnitude
 
                 _isTooDark.value = lightLevel < BRIGHTNESS_THRESHOLD
                 soundAmplitude?.let { _isTooLoud.value = it > SOUND_THRESHOLD }
 
-                if((BASE_ACCELERATION-accelerationMagnitude).absoluteValue/100 > MOVEMENT_TRHESOLD){
+            }.collect()
+        }
+
+        viewModelScope.launch {
+            sensorRepository.accelerationMagnitude.collect { it ->
+                _movementMagnitude.value = it
+
+                val accelerationChange = (it - BASE_ACCELERATION).absoluteValue
+                if (accelerationChange > MOVEMENT_TRHESOLD) {
                     _wasMobileMoved.value++
+                    delay(3000)
                 }
 
-            }.collect()
-
+            }
         }
     }
 
@@ -135,7 +141,6 @@ class SessionVM @Inject  constructor(
      */
     suspend fun startTimer(){
         interrupt = false
-
         _isBreak.value = false
 
         efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak) else sessionProperties.value.duration
@@ -180,9 +185,10 @@ class SessionVM @Inject  constructor(
 
         if (successful){
             interrupt = true
-            _overallElapsedSeconds.value = 0
         }
 
+        _overallElapsedSeconds.value = 0
+        _segmentElapsedSeconds.value = 0
         _isTooDark.value = false
         _isTooLoud.value = false
         _wasMobileMoved.value = 0
@@ -410,7 +416,7 @@ class SessionVM @Inject  constructor(
     /**
      * Alarm Vibration + Sound wenn eine Session abgebrochen wird
      */
-    fun alarm(context: Context) {
+    fun alarm() {
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
         vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat

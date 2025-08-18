@@ -61,9 +61,6 @@ fun SessionPropertiesDialog(
     val sessionProperties by viewModel.sessionProperties.collectAsState()
     val isInvalidBreak by viewModel.isInvalidBreak.collectAsState()
 
-    //var numbers = remember { (0..100).toList()}
-    //var listState = rememberLazyListState(initialFirstVisibleItemIndex = sessionProperties.numBreaks)
-
     val durationTimerInput = rememberTimePickerState(
         initialHour = viewModel.getHours(),
         initialMinute = viewModel.getMinutes(),
@@ -124,14 +121,8 @@ fun SessionPropertiesDialog(
                         )
 
                         SessionSettingsRow("Num Breaks"){
-                            /*
-                            HotizontalNumberPicker(
-                                list = numbers,
-                                listState= listState
-                            )
-                            Log.d("Picked Number","${numbers[listState.firstVisibleItemIndex+1]}")
-                            */
-                            var numBreaks by remember { mutableStateOf<String>("") }
+
+                            var numBreaks by remember { mutableStateOf<String>("${sessionProperties.numBreaks}") }
 
                             OutlinedTextField(
                                 modifier = Modifier.wrapContentWidth(),
