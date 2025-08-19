@@ -127,7 +127,7 @@ fun HomeScreen(
                     navController.navigate("leaderboard")
                 },
                 modifier = Modifier
-                    .background(Purple40, shape = RoundedCornerShape(15.dp))
+                    .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(15.dp))
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.trophyicon),
