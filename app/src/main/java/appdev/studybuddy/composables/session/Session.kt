@@ -3,6 +3,7 @@ package appdev.studybuddy.composables.session
 import androidx.compose.runtime.rememberCoroutineScope
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -40,6 +41,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
@@ -77,6 +81,9 @@ fun SessionScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+
     StudyBuddyScaffold {
 
         BackHandler {
@@ -97,6 +104,21 @@ fun SessionScreen(
             viewModel.onResume()
             onDispose {
                 viewModel.onPause()
+            }
+        }
+
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_PAUSE) {
+                    Log.d("LIFECYCLE DEBUG","onPause triggerd")
+                    //viewModel.endSession(fail = true)
+                }
+            }
+
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
             }
         }
 
