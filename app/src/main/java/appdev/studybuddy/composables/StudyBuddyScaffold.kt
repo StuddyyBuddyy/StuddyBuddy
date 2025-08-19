@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import appdev.studybuddy.controller.SnackBarController
 import appdev.studybuddy.ui.theme.Pink40
-import appdev.studybuddy.ui.theme.Pink80
 
 @Composable
 fun StudyBuddyScaffold(

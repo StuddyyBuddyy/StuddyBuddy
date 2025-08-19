@@ -41,9 +41,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 import android.media.MediaPlayer
 import android.os.VibrationEffect
-import android.os.Vibrator
 import android.os.VibratorManager
-import androidx.core.content.ContextCompat.getSystemService
 import appdev.studybuddy.R
 import appdev.studybuddy.controller.SnackBarController
 import appdev.studybuddy.controller.SnackBarEvent
@@ -61,7 +59,7 @@ class SessionVM @Inject  constructor(
     private val SOUND_THRESHOLD = 750
     private val MOVEMENT_TRHESOLD = 1f //Grenzwert wenn Handy mehr als x bewegt wird/ bzw. von BASE_ACCELERATION abweicht
     private val BASE_ACCELERATION = 9.81f
-    private val MOVEMENT_LIMIT = 2
+    val MOVEMENT_LIMIT = 2
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
