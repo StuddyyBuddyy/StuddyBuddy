@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -214,8 +215,8 @@ fun HomeScreen(
                 LazyColumn(
                     modifier = Modifier
                         //.fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                        .sizeIn(maxHeight = 200.dp),
+                        .height(200.dp)
+                        .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(personalScoreboard.toList()) { (sessionDate, points) ->
@@ -224,7 +225,7 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.padding(10.dp))
+            Spacer(modifier = Modifier.padding(30.dp))
 
             Row() {
                 Button(

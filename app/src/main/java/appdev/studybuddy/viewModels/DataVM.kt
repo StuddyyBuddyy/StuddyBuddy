@@ -30,7 +30,7 @@ class DataVM : ViewModel() {
 
     suspend fun sortSessionPoints(user: User): Map<String, Int>{
         for (session in dao.getUserSessions(user.email)){
-            sessionPoints[session.date] = session.points
+            sessionPoints[session.id.toString()] = session.points
         }
         Log.d("SessionPoints", sessionPoints.toString())
         return sessionPoints.toList().sortedByDescending { (_, value) -> value }.toMap()
