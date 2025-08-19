@@ -40,8 +40,10 @@ import java.util.Date
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 import android.media.MediaPlayer
+import android.os.PowerManager
 import android.os.VibrationEffect
 import android.os.VibratorManager
+import androidx.core.content.ContextCompat.getSystemService
 import appdev.studybuddy.R
 import appdev.studybuddy.controller.SnackBarController
 import appdev.studybuddy.controller.SnackBarEvent
@@ -433,5 +435,6 @@ class SessionVM @Inject  constructor(
         val mediaPlayer = MediaPlayer.create(context, R.raw.alarm)
         mediaPlayer.start()
     }
+
 }
 
