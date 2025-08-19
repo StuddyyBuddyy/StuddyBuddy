@@ -42,9 +42,11 @@ import kotlin.math.absoluteValue
 import android.media.MediaPlayer
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
-import androidx.compose.ui.platform.LocalContext
+import android.os.VibratorManager
+import androidx.core.content.ContextCompat.getSystemService
 import appdev.studybuddy.R
+import appdev.studybuddy.controller.SnackBarController
+import appdev.studybuddy.controller.SnackBarEvent
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 
@@ -59,6 +61,7 @@ class SessionVM @Inject  constructor(
     private val SOUND_THRESHOLD = 750
     private val MOVEMENT_TRHESOLD = 1f //Grenzwert wenn Handy mehr als x bewegt wird/ bzw. von BASE_ACCELERATION abweicht
     private val BASE_ACCELERATION = 9.81f
+    private val MOVEMENT_LIMIT = 2
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
@@ -127,8 +130,15 @@ class SessionVM @Inject  constructor(
                 _movementMagnitude.value = it
 
                 val accelerationChange = (it - BASE_ACCELERATION).absoluteValue
-                if (accelerationChange > MOVEMENT_TRHESOLD) {
+                if ((accelerationChange > MOVEMENT_TRHESOLD) && !isBreak.value) {
                     _wasMobileMoved.value++
+                    if(wasMobileMoved.value<MOVEMENT_LIMIT){
+                        SnackBarController.sendEvent(
+                            SnackBarEvent(
+                                message = "If you move your phone ${MOVEMENT_LIMIT-wasMobileMoved.value} more time(s), the session will be terminated!"
+                            )
+                        )
+                    }
                     delay(3000)
                 }
 
@@ -417,7 +427,8 @@ class SessionVM @Inject  constructor(
      * Alarm Vibration + Sound wenn eine Session abgebrochen wird
      */
     fun alarm() {
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        val vibrator = vibratorManager.defaultVibrator
         val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
         vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat
 
