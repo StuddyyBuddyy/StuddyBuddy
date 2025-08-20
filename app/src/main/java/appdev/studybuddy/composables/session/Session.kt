@@ -109,9 +109,14 @@ fun SessionScreen(
 
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_PAUSE) {
-                    Log.d("LIFECYCLE DEBUG","onPause triggerd")
-                    //viewModel.endSession(fail = true)
+                if (event == Lifecycle.Event.ON_PAUSE && navController.previousBackStackEntry!=null) {
+                    val successful = viewModel.endSession(fail = true)
+                    if (successful) {
+                        navController.popBackStack()
+                        dialogOption = DialogOption.NONE
+                    } else {
+                        showErrorToast = true
+                    }
                 }
             }
 
@@ -300,9 +305,6 @@ fun SessionScreen(
                         onConfirm = {
                             val successful = viewModel.endSession(fail = true)
                             if (successful) {
-                                coroutineScope.launch {
-                                    viewModel.alarm()
-                                }
                                 navController.popBackStack()
                                 dialogOption = DialogOption.NONE
                             } else {
@@ -330,9 +332,7 @@ fun SessionScreen(
                 DialogOption.MOVED -> {
                     val successful = viewModel.endSession(fail = true)
                     if (successful) {
-                        coroutineScope.launch {
-                            viewModel.alarm()
-                        }
+                        Log.e("LIFECYCLE DEBUG","onPause triggerd ${navController.currentBackStackEntry.toString()}")
                         navController.popBackStack()
                         dialogOption = DialogOption.NONE
                     } else {

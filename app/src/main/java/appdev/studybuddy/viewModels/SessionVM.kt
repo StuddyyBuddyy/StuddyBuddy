@@ -45,6 +45,7 @@ import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.core.content.ContextCompat.getSystemService
 import appdev.studybuddy.R
+import appdev.studybuddy.composables.session.DialogOption
 import appdev.studybuddy.controller.SnackBarController
 import appdev.studybuddy.controller.SnackBarEvent
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -195,6 +196,11 @@ class SessionVM @Inject  constructor(
 
         if (successful){
             interrupt = true
+
+            viewModelScope.launch {
+                alarm()
+            }
+
         }
 
         _overallElapsedSeconds.value = 0
