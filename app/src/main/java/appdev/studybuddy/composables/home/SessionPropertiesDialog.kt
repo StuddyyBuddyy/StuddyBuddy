@@ -138,7 +138,7 @@ fun SessionPropertiesDialog(
 
                         if(isInvalidBreak){
                             Text(
-                                text = "Break(s) cant be longer then session!",
+                                text = "Break(s) cant be longer than session!",
                                 color = Color.Red,
                                 fontWeight = FontWeight.Bold
                             )
