@@ -194,7 +194,7 @@ class SessionVM @Inject  constructor(
             successful = dao.insertSession(session)
         }
 
-        if (successful){
+        if (successful && fail){
             interrupt = true
 
             viewModelScope.launch {
