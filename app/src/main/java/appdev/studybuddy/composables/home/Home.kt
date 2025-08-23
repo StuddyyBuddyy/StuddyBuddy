@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
+import appdev.studybuddy.models.Session
 import appdev.studybuddy.ui.theme.Purple40
 import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.ui.theme.PurpleBackground2
@@ -84,11 +84,11 @@ fun HomeScreen(
             )
         }
 
-        var personalScoreboard: Map<String, Int> by remember { mutableStateOf(emptyMap()) }
+        var sortedSessions: List<Session> by remember { mutableStateOf(emptyList()) }
         var userTotalPoints: Int by remember { mutableIntStateOf(0) }
         LaunchedEffect(userVM.currentUser) {
             userVM.currentUser?.let { user ->
-                personalScoreboard = dataVM.sortSessionPoints(user)
+                sortedSessions = dataVM.sortSessionsByPoints(user)
                 userTotalPoints = dataVM.addSessionPoints(user)
             }
         }
@@ -169,7 +169,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.padding(10.dp))
             
-            if(personalScoreboard.isEmpty() ){
+            if(sortedSessions.isEmpty() ){
                 val composition by rememberLottieComposition(
                     LottieCompositionSpec.RawRes(R.raw.loadingbook)
                 )
@@ -228,8 +228,8 @@ fun HomeScreen(
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(personalScoreboard.toList()) { (sessionDate, points) ->
-                        PersonalScoreboardRow(sessionDate, points)
+                    items(sortedSessions) { session ->
+                        PersonalScoreboardRow(session.date, session.points)
                     }
                 }
             }

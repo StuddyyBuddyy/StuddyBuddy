@@ -3,12 +3,12 @@ package appdev.studybuddy.viewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import appdev.studybuddy.models.DAO
+import appdev.studybuddy.models.Session
 import appdev.studybuddy.models.User
 
 class DataVM : ViewModel() {
     val dao = DAO()
     val userPoints = mutableMapOf<String, Int>()
-    val sessionPoints = mutableMapOf<String, Int>()
 
     suspend fun sortUsersByPoints(): Map<String, Int>{
             for (user in dao.getAllUsers()) {
@@ -28,11 +28,8 @@ class DataVM : ViewModel() {
         return totalPoints
     }
 
-    suspend fun sortSessionPoints(user: User): Map<String, Int>{
-        for (session in dao.getUserSessions(user.email)){
-            sessionPoints[session.id.toString()] = session.points
-        }
-        Log.d("SessionPoints", sessionPoints.toString())
-        return sessionPoints.toList().sortedByDescending { (_, value) -> value }.toMap()
+    suspend fun sortSessionsByPoints(user: User): List<Session> {
+        val sessions = dao.getUserSessions(user.email)
+        return sessions.sortedByDescending { it.points }
     }
 }
