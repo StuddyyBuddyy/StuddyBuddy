@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -24,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
-import appdev.studybuddy.ui.theme.PurpleBackground
 import appdev.studybuddy.viewModels.SessionVM
 
 @Composable
@@ -133,7 +133,7 @@ fun DialogBox(
         modifier = modifier
             .padding(48.dp)
             .clip(shape = RoundedCornerShape(20.dp))
-            .background(color = PurpleBackground)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
     ) {
         content()
     }

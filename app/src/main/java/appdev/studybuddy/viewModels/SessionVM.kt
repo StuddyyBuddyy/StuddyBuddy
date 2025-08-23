@@ -40,23 +40,29 @@ import java.util.Date
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 import android.media.MediaPlayer
+import android.os.PowerManager
 import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.VibratorManager
+import androidx.core.content.ContextCompat.getSystemService
 import appdev.studybuddy.R
+import appdev.studybuddy.composables.session.DialogOption
+import appdev.studybuddy.controller.SnackBarController
+import appdev.studybuddy.controller.SnackBarEvent
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 
 @HiltViewModel
 class SessionVM @Inject  constructor(
     private val userPreferences: UserPreferences,
-    private val sensorRepository: SensorRepository
+    private val sensorRepository: SensorRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val MIN_NOTIFICATION_TIME = 5
-
     private val BRIGHTNESS_THRESHOLD = 10
-    private val SOUND_THRESHOLD = 500
-    private val MOVEMENT_TRHESOLD = 0.05 //Grenzwert wenn Handy mehr als x% bewegt wird
-    private val BASE_ACCELERATION = 9.81
+    private val SOUND_THRESHOLD = 750
+    private val MOVEMENT_TRHESOLD = 1f //Grenzwert wenn Handy mehr als x bewegt wird/ bzw. von BASE_ACCELERATION abweicht
+    private val BASE_ACCELERATION = 9.81f
+    val MOVEMENT_LIMIT = 2
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
@@ -64,14 +70,17 @@ class SessionVM @Inject  constructor(
     private var _isInvalidBreak = MutableStateFlow<Boolean>(false) //Indikator ob Pausen valid sind im Verhältnis zur Session-Dauer
     val isInvalidBreak: StateFlow<Boolean> = _isInvalidBreak
 
-    private var _elapsedSeconds = MutableStateFlow<Int>(0)
-    val elapsedSeconds: StateFlow<Int> = _elapsedSeconds
+    private var _overallElapsedSeconds = MutableStateFlow<Int>(0)
+    val overallElapsedSeconds: StateFlow<Int> = _overallElapsedSeconds
+
+    private var _segmentElapsedSeconds = MutableStateFlow<Int>(0)
+    val segmentElapsedSeconds: StateFlow<Int> = _segmentElapsedSeconds
+
+    var efficientTime: Int = 0
+    var sessionTimeSegment: Int = 0
 
     private var _isBreak = MutableStateFlow<Boolean>(false)
     val isBreak: StateFlow<Boolean> = _isBreak
-
-    private var _breakNotifier = MutableStateFlow<Int>(0)
-    val breakNotifier : StateFlow<Int> = _breakNotifier
 
     private var _isTooDark = MutableStateFlow<Boolean>(false)
     val isTooDark : StateFlow<Boolean> = _isTooDark
@@ -79,8 +88,16 @@ class SessionVM @Inject  constructor(
     private var _isTooLoud = MutableStateFlow<Boolean>(false)
     val isTooLoud : StateFlow<Boolean> =  _isTooLoud
 
-    private var _wasMobileMoved = MutableStateFlow<Boolean>(false)
-    val wasMobileMoved : StateFlow<Boolean> = _wasMobileMoved
+    private var _wasMobileMoved = MutableStateFlow<Int>(0)
+    val wasMobileMoved : StateFlow<Int> = _wasMobileMoved
+
+    //For Debug:
+    private var _lightLevel = MutableStateFlow<Float>(0f)
+    val lightLevel : StateFlow<Float> = _lightLevel
+    private var _soundAmplitude = MutableStateFlow<Int?>(0)
+    val soundAmplitude : StateFlow<Int?> = _soundAmplitude
+    private var _movementMagnitude = MutableStateFlow<Float>(0f)
+    val movementMagnitude : StateFlow<Float> = _movementMagnitude
 
     var sessionDescription : String = ""
 
@@ -98,54 +115,67 @@ class SessionVM @Inject  constructor(
             combine(
                 sensorRepository.lightLevel,
                 sensorRepository.soundAmplitude,
-                sensorRepository.accelerationMagnitude
-            ) { lightLevel, soundAmplitude, accelerationMagnitude ->
+            ) { lightLevel, soundAmplitude ->
+
+                _lightLevel.value = lightLevel //for Debug
+                _soundAmplitude.value = soundAmplitude
+
                 _isTooDark.value = lightLevel < BRIGHTNESS_THRESHOLD
                 soundAmplitude?.let { _isTooLoud.value = it > SOUND_THRESHOLD }
-                _wasMobileMoved.value = (BASE_ACCELERATION-accelerationMagnitude).absoluteValue/100 > MOVEMENT_TRHESOLD
+
             }.collect()
+        }
+
+        viewModelScope.launch {
+            sensorRepository.accelerationMagnitude.collect { it ->
+                _movementMagnitude.value = it
+
+                val accelerationChange = (it - BASE_ACCELERATION).absoluteValue
+                if ((accelerationChange > MOVEMENT_TRHESOLD) && !isBreak.value) {
+                    _wasMobileMoved.value++
+                    if(wasMobileMoved.value<MOVEMENT_LIMIT){
+                        SnackBarController.sendEvent(
+                            SnackBarEvent(
+                                message = "If you move your phone ${MOVEMENT_LIMIT-wasMobileMoved.value} more time(s), the session will be terminated!"
+                            )
+                        )
+                    }
+                    delay(3000)
+                }
+
+            }
         }
     }
 
     /**
      * Starte den Timer im SessionScreen. Trackt dabei Pausen (wechselt isBreak)
-     * MIN_NOTIFICATION_TIME gibt an wieviele Sekunden vor einer Pause der Nutzer benachrichtigt wird.
      */
     suspend fun startTimer(){
         interrupt = false
-
-        var efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak)
-                            else sessionProperties.value.duration
-        var sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
-
         _isBreak.value = false
-        var sessionTimeCounter = 0
-        var breakTimeCounter = 0
 
-        while (elapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
+        efficientTime = if (sessionProperties.value.numBreaks>0) sessionProperties.value.duration-(sessionProperties.value.numBreaks*sessionProperties.value.durationBreak) else sessionProperties.value.duration
+        sessionTimeSegment = efficientTime/(sessionProperties.value.numBreaks+1)
+
+        while (overallElapsedSeconds.value < sessionProperties.value.duration  && !interrupt) {
             delay(1000)
-            _elapsedSeconds.value++
+            _overallElapsedSeconds.value++
 
             if (!_isBreak.value) { //keine Pause
-                sessionTimeCounter++
+                _segmentElapsedSeconds.value++
 
-                if(sessionTimeCounter>=sessionTimeSegment-MIN_NOTIFICATION_TIME && elapsedSeconds.value < sessionProperties.value.duration-MIN_NOTIFICATION_TIME){
-                    _breakNotifier.value = sessionTimeSegment-sessionTimeCounter
-                }
-
-                if (sessionTimeCounter >= sessionTimeSegment) {
+                if (_segmentElapsedSeconds.value >= sessionTimeSegment) {
+                    notifyBreak()
                     _isBreak.value = true
-                    sessionTimeCounter = 0
+                    _segmentElapsedSeconds.value = 0
                 }
 
             } else { //in einer Pause
-                breakTimeCounter++
+                _segmentElapsedSeconds.value++
 
-                //todo maybe sensor usage disablen während Pause?
-
-                if (breakTimeCounter >= sessionProperties.value.durationBreak) {
+                if (_segmentElapsedSeconds.value >= sessionProperties.value.durationBreak) {
                     _isBreak.value = false
-                    breakTimeCounter = 0
+                    _segmentElapsedSeconds.value = 0
                 }
             }
 
@@ -164,14 +194,20 @@ class SessionVM @Inject  constructor(
             successful = dao.insertSession(session)
         }
 
-        if (successful){
+        if (successful && fail){
             interrupt = true
-            _elapsedSeconds.value = 0
+
+            viewModelScope.launch {
+                alarm()
+            }
+
         }
 
+        _overallElapsedSeconds.value = 0
+        _segmentElapsedSeconds.value = 0
         _isTooDark.value = false
         _isTooLoud.value = false
-        _wasMobileMoved.value = false
+        _wasMobileMoved.value = 0
 
         return successful
     }
@@ -317,7 +353,7 @@ class SessionVM @Inject  constructor(
     }
 
     fun setElapsedSeconds(elapsedSeconds: Int){
-        _elapsedSeconds.value = elapsedSeconds
+        _overallElapsedSeconds.value = elapsedSeconds
     }
 
     fun setUseSoundSensor(useSoundSensor: Boolean){
@@ -357,14 +393,15 @@ class SessionVM @Inject  constructor(
         }
     }
 
-    fun setNumBreaks(numBreaks: Int){
-        if(sessionProperties.value.duration/2<=numBreaks*sessionProperties.value.durationBreak){
+    fun setNumBreaks(numBreaks: String){
+
+        if(numBreaks.isEmpty()||sessionProperties.value.duration/2<=numBreaks.toInt()*sessionProperties.value.durationBreak || numBreaks.isEmpty()){
             _isInvalidBreak.value = true
         }else {
             _isInvalidBreak.value = false
             viewModelScope.launch {
                 userPreferences.saveSessionProperties(
-                    _sessionProperties.value.copy(numBreaks = numBreaks)
+                    _sessionProperties.value.copy(numBreaks = numBreaks.toInt())
                 )
             }
         }
@@ -382,13 +419,28 @@ class SessionVM @Inject  constructor(
             }
         }
     }
-    fun alarm(context: Context) {
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+
+    /**
+     * Sound wenn eine Pause beginnt.
+     */
+    fun notifyBreak(){
+        val mediaPlayer = MediaPlayer.create(context, R.raw.simple_breaksound)
+        mediaPlayer.start()
+    }
+
+    /**
+     * Alarm Vibration + Sound wenn eine Session abgebrochen wird
+     */
+    fun alarm() {
+        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        val vibrator = vibratorManager.defaultVibrator
         val timings = longArrayOf(0, 500, 300, 500, 300, 500, 300, 500, 300)
         vibrator.vibrate(VibrationEffect.createWaveform(timings, -1)) // -1 = no repeat
 
         val mediaPlayer = MediaPlayer.create(context, R.raw.alarm)
         mediaPlayer.start()
     }
+
 }
 

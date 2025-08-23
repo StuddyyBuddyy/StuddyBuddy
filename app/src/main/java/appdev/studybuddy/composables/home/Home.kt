@@ -129,10 +129,6 @@ fun HomeScreen(
                 onClick = {
                     displayLogoutDialog = true
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Purple40,
-                    contentColor = Color.White
-                ),
                 shape = RoundedCornerShape(15.dp),
             ) {
                 Text(text = "Logout")
@@ -145,7 +141,7 @@ fun HomeScreen(
                     navController.navigate("leaderboard")
                 },
                 modifier = Modifier
-                    .background(Purple40, shape = RoundedCornerShape(15.dp))
+                    .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(15.dp))
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.trophyicon),
@@ -245,10 +241,6 @@ fun HomeScreen(
                     onClick = {
                         navController.navigate("session")
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Purple40,
-                        contentColor = Color.White
-                    ),
                     shape = RoundedCornerShape(15.dp)
                 ) {
                     Text(text = "Start Session")
@@ -261,7 +253,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Settings,
-                        contentDescription = "Session Settings"
+                        contentDescription = "Session Settings",
                     )
 
                 }

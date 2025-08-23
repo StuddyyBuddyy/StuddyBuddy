@@ -3,6 +3,7 @@ package appdev.studybuddy.composables.session
 import androidx.compose.runtime.rememberCoroutineScope
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -36,15 +37,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
+import appdev.studybuddy.ui.theme.Pink40
+import appdev.studybuddy.ui.theme.Pink80
 import appdev.studybuddy.viewModels.SessionVM
 import kotlinx.coroutines.launch
 
-@SuppressLint("DefaultLocale")
+@SuppressLint("DefaultLocale", "CoroutineCreationDuringComposition")
 @Composable
 fun SessionScreen(
     navController: NavController,
@@ -56,21 +64,27 @@ fun SessionScreen(
     var dialogOption by remember { mutableStateOf(DialogOption.NONE) }
 
     val sessionProperties by viewModel.sessionProperties.collectAsState()
-    val elapsedSeconds by viewModel.elapsedSeconds.collectAsState()
+    val overallElapsedSeconds by viewModel.overallElapsedSeconds.collectAsState()
+    val segmentElapsedSeconds by viewModel.segmentElapsedSeconds.collectAsState()
     val isBreak by viewModel.isBreak.collectAsState()
-    val breakNotifier by viewModel.breakNotifier.collectAsState()
 
     val isTooDark by viewModel.isTooDark.collectAsState()
     val isTooLoud by viewModel.isTooLoud.collectAsState()
     val wasMobileMoved by viewModel.wasMobileMoved.collectAsState()
+
+    if(wasMobileMoved==viewModel.MOVEMENT_LIMIT){
+        dialogOption = DialogOption.MOVED
+    }
 
     val imageUrl by viewModel.dogImageUrl.collectAsState()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
     val coroutineScope = rememberCoroutineScope()
 
-    StudyBuddyScaffold {
+    val lifecycleOwner = LocalLifecycleOwner.current
 
+
+    StudyBuddyScaffold {
 
         BackHandler {
             dialogOption = DialogOption.INTERRUPT
@@ -93,14 +107,24 @@ fun SessionScreen(
             }
         }
 
-        //Timer Berechnungen
-        val progress = elapsedSeconds / sessionProperties.duration.toFloat()
-        val remainingSeconds = sessionProperties.duration - elapsedSeconds
-        val minutesLeft = remainingSeconds / 60
-        val secondsLeft = remainingSeconds % 60
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_PAUSE && navController.previousBackStackEntry!=null) {
+                    val successful = viewModel.endSession(fail = true)
+                    if (successful) {
+                        navController.popBackStack()
+                        dialogOption = DialogOption.NONE
+                    } else {
+                        showErrorToast = true
+                    }
+                }
+            }
 
-        if (remainingSeconds == 0 && dialogOption == DialogOption.NONE) {
-            dialogOption = DialogOption.DESCRIPTION_SUCCESS
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         Box(
@@ -112,6 +136,23 @@ fun SessionScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                //Timer Berechnungen
+                val progress = overallElapsedSeconds / sessionProperties.duration.toFloat()
+
+                val overallRemainingSeconds = sessionProperties.duration - overallElapsedSeconds
+                val overallHoursLeft = overallRemainingSeconds / 3600
+                val overallMinutesLeft = overallRemainingSeconds % 3600 / 60
+                val overallSecondsLeft = overallRemainingSeconds % 60
+
+                val segmentRemainingSeconds = if(isBreak) (sessionProperties.durationBreak - segmentElapsedSeconds) else (viewModel.sessionTimeSegment - segmentElapsedSeconds)
+                val segmentHoursLeft = segmentRemainingSeconds / 3600
+                val segmentMinutesLeft = segmentRemainingSeconds % 3600 / 60
+                val segmentSecondsLeft = segmentRemainingSeconds % 60
+
+                if (overallRemainingSeconds == 0 && dialogOption == DialogOption.NONE) {
+                    dialogOption = DialogOption.DESCRIPTION_SUCCESS
+                }
+
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
@@ -119,7 +160,7 @@ fun SessionScreen(
                         painter = painterResource(id = R.drawable.baseline_light_mode_24),
                         contentDescription = "Light Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = if (isTooDark) Color.Red else Color.Green,
+                        tint = if (isTooDark && !isBreak) Pink40 else Pink80,
                     )
 
                     Spacer(Modifier.padding(10.dp))
@@ -128,29 +169,12 @@ fun SessionScreen(
                         painter = painterResource(id = R.drawable.speaker_filled_audio),
                         contentDescription = "Sound Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = if (isTooLoud) Color.Red else Color.Green,
-                    )
-                }
-
-                if (wasMobileMoved) {
-
-                    //todo was soll alles passieren wenn Handy bewegt wird? Session abbrechen?
-
-                    Text(
-                        text = "Put your phone away!",
-                        color = Color.Red
-                    )
-                }
-
-                if (breakNotifier > 0) {
-                    Text(
-                        text = String.format("Break starts in: %d ", breakNotifier),
-                        color = Color.Red,
+                        tint = if (isTooLoud && !isBreak) Pink40 else Pink80,
                     )
                 }
 
                 Box(
-                    modifier = Modifier.padding(40.dp),
+                    modifier = Modifier.padding(30.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
@@ -158,23 +182,26 @@ fun SessionScreen(
                         modifier = Modifier.size(250.dp),
                         color = Color(0xFF000000),
                         strokeWidth = 12.dp,
-                        trackColor = if (isBreak) Color.Red else Color.Green,
+                        trackColor = if (isBreak) Pink40 else Pink80,
                         strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
                     )
 
                     Text(
-                        text = String.format("%02d:%02d", minutesLeft, secondsLeft),
-                        color = if (isBreak) Color.Red else Color.Green,
-                        style = MaterialTheme.typography.headlineMedium
+                        text = String.format("${if (isBreak) "Break Segment" else "Learn Segment"}\n" +
+                                "%02d:%02d:%02d", segmentHoursLeft, segmentMinutesLeft, segmentSecondsLeft),
+                        textAlign = TextAlign.Center,
+                        color = if (isBreak) Pink40 else Pink80,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 25.sp
                     )
                 }
 
-                if (isBreak) {
-                    Text(
-                        text = String.format("Take a break! XXX todo ", isBreak),
-                        color = Color.Red,
-                    )
-                }
+                Text(
+                    text = String.format("Overall: %02d:%02d:%02d", overallHoursLeft, overallMinutesLeft, overallSecondsLeft),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontSize = 15.sp,
+                    color = Pink80
+                )
 
                 Spacer(modifier = Modifier.padding(10.dp))
 
@@ -192,13 +219,39 @@ fun SessionScreen(
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
             ) {
-                if (isTooDark) {
+                if (isTooDark && !isBreak) {
                     Banner(text = "Its too dark, you might wanna turn on some light!")
                 }
 
-                if (isTooLoud) {
+                if (isTooLoud && !isBreak) {
                     Banner(text = "Its too loud, you might wanna change your location!")
                 }
+            }
+
+            Column( //Column am unteren Bildschirmrand für Sensor Debugging
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+            ) {
+                val lightLevel by viewModel.lightLevel.collectAsState()
+                val soundAmplitude by viewModel.soundAmplitude.collectAsState()
+                val movementMagnitude by viewModel.movementMagnitude.collectAsState()
+
+                Text(
+                    text = "Debug Light: $lightLevel"
+                )
+                Spacer(Modifier.padding(3.dp))
+                Text(
+                    text = "Debug Sound: $soundAmplitude"
+                )
+                Spacer(Modifier.padding(3.dp))
+                Text(
+                    text = "Debug Movement: $movementMagnitude"
+                )
+                Spacer(Modifier.padding(3.dp))
+                Text(
+                    text = "Was Moved Counter: $wasMobileMoved"
+                )
             }
 
             when (dialogOption) {
@@ -252,9 +305,6 @@ fun SessionScreen(
                         onConfirm = {
                             val successful = viewModel.endSession(fail = true)
                             if (successful) {
-                                coroutineScope.launch {
-                                    viewModel.alarm(context)
-                                }
                                 navController.popBackStack()
                                 dialogOption = DialogOption.NONE
                             } else {
@@ -277,6 +327,17 @@ fun SessionScreen(
                         dismissable = false,
                         sessionVM = viewModel
                     )
+                }
+
+                DialogOption.MOVED -> {
+                    val successful = viewModel.endSession(fail = true)
+                    if (successful) {
+                        Log.e("LIFECYCLE DEBUG","onPause triggerd ${navController.currentBackStackEntry.toString()}")
+                        navController.popBackStack()
+                        dialogOption = DialogOption.NONE
+                    } else {
+                        showErrorToast = true
+                    }
                 }
             }
 
@@ -314,7 +375,7 @@ fun Banner(
             text = text,
             modifier = Modifier
                 .padding(8.dp)
-                .background(Color.Red),
+                .background(Pink40),
         )
         Row(
             modifier = Modifier
@@ -345,5 +406,6 @@ enum class DialogOption {
     SUCCESS,
     INTERRUPT,
     DESCRIPTION_SUCCESS,
-    DESCRIPTION_FAIL
+    DESCRIPTION_FAIL,
+    MOVED
 }
