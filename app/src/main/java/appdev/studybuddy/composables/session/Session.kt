@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -47,8 +48,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
-import appdev.studybuddy.ui.theme.Pink40
-import appdev.studybuddy.ui.theme.Pink80
 import appdev.studybuddy.viewModels.SessionVM
 import kotlinx.coroutines.launch
 
@@ -160,7 +159,7 @@ fun SessionScreen(
                         painter = painterResource(id = R.drawable.baseline_light_mode_24),
                         contentDescription = "Light Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = if (isTooDark && !isBreak) Pink40 else Pink80,
+                        tint = if (isTooDark && !isBreak) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondaryContainer,
                     )
 
                     Spacer(Modifier.padding(10.dp))
@@ -169,7 +168,7 @@ fun SessionScreen(
                         painter = painterResource(id = R.drawable.speaker_filled_audio),
                         contentDescription = "Sound Feedback",
                         modifier = Modifier.size(24.dp),
-                        tint = if (isTooLoud && !isBreak) Pink40 else Pink80,
+                        tint = if (isTooLoud && !isBreak) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondaryContainer,
                     )
                 }
 
@@ -182,7 +181,7 @@ fun SessionScreen(
                         modifier = Modifier.size(250.dp),
                         color = Color(0xFF000000),
                         strokeWidth = 12.dp,
-                        trackColor = if (isBreak) Pink40 else Pink80,
+                        trackColor = if (isBreak) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondaryContainer,
                         strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
                     )
 
@@ -190,7 +189,7 @@ fun SessionScreen(
                         text = String.format("${if (isBreak) "Break Segment" else "Learn Segment"}\n" +
                                 "%02d:%02d:%02d", segmentHoursLeft, segmentMinutesLeft, segmentSecondsLeft),
                         textAlign = TextAlign.Center,
-                        color = if (isBreak) Pink40 else Pink80,
+                        color = if (isBreak) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondaryContainer,
                         style = MaterialTheme.typography.headlineMedium,
                         fontSize = 25.sp
                     )
@@ -200,7 +199,7 @@ fun SessionScreen(
                     text = String.format("Overall: %02d:%02d:%02d", overallHoursLeft, overallMinutesLeft, overallSecondsLeft),
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 15.sp,
-                    color = Pink80
+                    color = MaterialTheme.colorScheme.secondaryContainer
                 )
 
                 Spacer(modifier = Modifier.padding(10.dp))
@@ -208,7 +207,8 @@ fun SessionScreen(
                 Button(
                     onClick = {
                         dialogOption = DialogOption.INTERRUPT
-                    }
+                    },
+                    shape = RoundedCornerShape(15.dp)
                 ) {
                     Text("End Session")
                 }
@@ -375,7 +375,7 @@ fun Banner(
             text = text,
             modifier = Modifier
                 .padding(8.dp)
-                .background(Pink40),
+                .background(MaterialTheme.colorScheme.tertiary),
         )
         Row(
             modifier = Modifier
