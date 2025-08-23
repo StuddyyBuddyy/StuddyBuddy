@@ -273,12 +273,28 @@ fun SessionDetailsDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("ID: ${session.id}")
-                Text("Date: ${session.date}")
-                Text("Duration: ${session.duration/60} minutes")
-                Text("Points: ${session.points}")
-                if(session.description != null) {
-                    Text("Description: ${session.description}")
+                Text(
+                    "ID: ${session.id}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Date: ${session.date}",
+                    fontSize = 18.sp
+                )
+                Text(
+                    "Duration: ${session.duration / 60} minutes",
+                    fontSize = 18.sp
+                )
+                Text(
+                    "Points: ${session.points}",
+                    fontSize = 18.sp
+                )
+                if (session.description != null) {
+                    Text(
+                        "Description: ${session.description}",
+                        fontSize = 18.sp
+                    )
                 }
             }
         },
