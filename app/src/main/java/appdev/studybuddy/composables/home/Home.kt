@@ -73,6 +73,9 @@ fun HomeScreen(
     StudyBuddyScaffold {
         var displaySessionDialog by remember { mutableStateOf(false) }
         var displayLogoutDialog by remember { mutableStateOf(false) }
+        var selectedSession by remember { mutableStateOf<Pair<String, Int>?>(null) }
+        var displaySessionDetails by remember { mutableStateOf(false) }
+
 
         if (displaySessionDialog) {
             SessionPropertiesDialog(
@@ -108,6 +111,16 @@ fun HomeScreen(
                 }
             )
         }
+
+        if (displaySessionDetails) {
+            LogoutDialog(
+                onDismiss = { displaySessionDetails = false },
+                onClick = {
+
+                }
+            )
+        }
+
         Row(
             modifier = Modifier
                 .padding(top = 30.dp, start = 15.dp, end = 15.dp)
@@ -258,6 +271,52 @@ fun HomeScreen(
     }
 }
 
+/*
+/**
+ * Dialog um den Session Details anzuzeigen
+ */
+@Composable
+fun SessionDetails(
+    onDismiss: () -> Unit,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(text = "Logout")
+            },
+            text = {
+                Text(text = "Are you sure you want to logout?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = onClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = logOutRed),
+                    shape = RoundedCornerShape(15.dp)
+                ) {
+                    Text("Yes, Logout", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(15.dp)
+                )
+                {
+                    Text("No, Cancel", color = Purple40)
+                }
+            },
+            shape = RoundedCornerShape(12.dp),
+            containerColor = PurpleBackground
+        )
+    }
+}
+
+ */
 
 /**
  * Dialog um den Logout zu bestätigen/ zu canceln
