@@ -2,7 +2,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
@@ -36,10 +35,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
-import appdev.studybuddy.ui.theme.Purple40
-import appdev.studybuddy.ui.theme.PurpleBackground
-import appdev.studybuddy.ui.theme.PurpleBackground2
-import appdev.studybuddy.ui.theme.PurpleDarkText
 import appdev.studybuddy.viewModels.DataVM
 import appdev.studybuddy.viewModels.UserVM
 import com.airbnb.lottie.compose.LottieAnimation
@@ -71,12 +66,12 @@ fun LeaderboardScreen(
                         navController.popBackStack()
                     },
                     modifier = Modifier
-                        .background(Purple40, shape = RoundedCornerShape(15.dp))
+                        .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(15.dp))
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -86,7 +81,7 @@ fun LeaderboardScreen(
             Text(
                 text = "Leaderboard",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Purple40,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 50.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
@@ -135,9 +130,9 @@ fun LeaderboardScreen(
 fun LeaderboardRow(username: String, points: Int, currentUsername: String) {
 
     val isCurrentUser = username == currentUsername
-    val backgroundColor = if (isCurrentUser) PurpleBackground2 else PurpleBackground
+    val backgroundColor = if (isCurrentUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
     val fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.Normal
-    val color = if (isCurrentUser) PurpleDarkText else Purple40
+    val color = if (isCurrentUser) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
 
     Card(
         shape = RoundedCornerShape(12.dp),

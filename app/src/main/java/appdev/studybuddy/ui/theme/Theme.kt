@@ -9,31 +9,62 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
+    onPrimary = PurpleDarkText,
     secondary = Purple40,
+    onSecondary = Color.White,
     tertiary = Pink80,
+    onTertiary = Color.White,
+
     background = DarkGrey,
+    onBackground = Color.White,
+
+    surface = Grey,
+    onSurface = Color.White,
+
     primaryContainer = Purple40,
-    secondaryContainer = Grey
+    onPrimaryContainer = Beige,
+    secondaryContainer = Grey,
+    onSecondaryContainer = Beige,
+    tertiaryContainer = Pink,
+    onTertiaryContainer = DarkGrey,
+
+    error = logOutRed,
+    onError = Color.White,
+
+    outline = PurpleDarkText,
+    outlineVariant = PurpleBackground
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
-    secondary = Purple80,
-    tertiary = Pink40,
-    background = Beige,
-
-    /* Other default colors to override
-    surface = Color(0xFFFFFBFE),
     onPrimary = Color.White,
+    secondary = Purple80,
     onSecondary = Color.White,
+    tertiary = Pink40,
     onTertiary = Color.White,
-    onSurface = Color(0xFF1C1B1F),
-    */
+
+    background = Beige,
+    onBackground = DarkGrey,
+
+    surface = PurpleBackground,
+    onSurface = PurpleDarkText,
+
+    primaryContainer = PurpleBackground2,
+    onPrimaryContainer = Color.White,
+    secondaryContainer = Pink,
+    onSecondaryContainer = DarkGrey,
+    tertiaryContainer = Grey,
+    onTertiaryContainer = Beige,
+
+    error = logOutRed,
+    onError = Color.White,
+
+    outline = PurpleDarkText,
+    outlineVariant = PurpleBackground
 )
 
 @Composable

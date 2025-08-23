@@ -37,11 +37,13 @@ fun EndSessionDialogFail(
             Text("End Session?")
             Text("Are you sure you want to end this session early?")
             Row {
-                Button(onClick = onConfirm) {
+                Button(onClick = onConfirm, shape = RoundedCornerShape(15.dp)) {
                     Text("Confirm")
                 }
 
-                Button(onClick = onDismiss) {
+                Spacer(modifier = Modifier.padding(10.dp))
+
+                Button(onClick = onDismiss, shape = RoundedCornerShape(15.dp)) {
                     Text("Cancel")
                 }
             }
@@ -69,13 +71,15 @@ fun EndSessionDialogSuccess(
                 Text("Loading...")
             }
             Row {
-                Button(onClick = onConfirm) {
+                Button(onClick = onConfirm, shape = RoundedCornerShape(15.dp)) {
                     Text("Confirm")
                 }
 
+                Spacer(modifier = Modifier.padding(10.dp))
+
                 Spacer(modifier = Modifier.size(12.dp))
                 Button(
-                    onClick = onDownload
+                    onClick = onDownload, shape = RoundedCornerShape(15.dp)
                 ) {
                     Text("Download")
                 }
@@ -109,13 +113,17 @@ fun DescriptionDialog(
                     onClick = {
                         onConfirm()
                         sessionVM.sessionDescription = text
-                    }
+                    },
+                    shape = RoundedCornerShape(15.dp)
                 ) {
                     Text("Confirm")
                 }
 
                 if (dismissable) {
-                    Button(onClick = onDismiss) {
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
+                    Button(onClick = onDismiss, shape = RoundedCornerShape(15.dp)) {
                         Text("Dismiss")
                     }
                 }

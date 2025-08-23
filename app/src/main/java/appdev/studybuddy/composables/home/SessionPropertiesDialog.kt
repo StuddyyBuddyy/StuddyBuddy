@@ -41,7 +41,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import appdev.studybuddy.ui.theme.DarkGrey
 import appdev.studybuddy.viewModels.SessionVM
 
 /**
@@ -189,7 +188,7 @@ fun SessionPropertiesDialog(
         },
 
         modifier = modifier,
-        containerColor = DarkGrey,
+        containerColor = MaterialTheme.colorScheme.background,
         textContentColor = Color.White
     )
 }

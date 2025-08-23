@@ -49,11 +49,6 @@ import androidx.navigation.NavController
 import appdev.studybuddy.R
 import appdev.studybuddy.composables.StudyBuddyScaffold
 import appdev.studybuddy.models.Session
-import appdev.studybuddy.ui.theme.Purple40
-import appdev.studybuddy.ui.theme.PurpleBackground
-import appdev.studybuddy.ui.theme.PurpleBackground2
-import appdev.studybuddy.ui.theme.PurpleDarkText
-import appdev.studybuddy.ui.theme.logOutRed
 import appdev.studybuddy.viewModels.DataVM
 import appdev.studybuddy.viewModels.SessionVM
 import appdev.studybuddy.viewModels.UserVM
@@ -147,7 +142,7 @@ fun HomeScreen(
                     painter = painterResource(id = R.drawable.trophyicon),
                     contentDescription = "Trophy",
                     modifier = Modifier.size(24.dp),
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -162,7 +157,7 @@ fun HomeScreen(
 
             Text(
                 text = "Hello ${userVM.currentUser?.username}!",
-                color = Purple40,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 30.sp,
                 fontStyle = MaterialTheme.typography.bodyLarge.fontStyle
             )
@@ -197,7 +192,7 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .padding(vertical = 4.dp, horizontal = 16.dp)
                         .background(
-                            color = PurpleBackground2,
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             shape = RoundedCornerShape(12.dp)
                         )
                         .padding(16.dp), // Innenabstand
@@ -208,13 +203,13 @@ fun HomeScreen(
                         text = "Your total score:",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
-                        color = PurpleDarkText
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "$userTotalPoints points",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
-                        color = PurpleDarkText
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -274,7 +269,7 @@ fun SessionDetailsDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Session Details", fontWeight = FontWeight.Bold)
+            Text(text = "Session Details", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -296,7 +291,7 @@ fun SessionDetailsDialog(
             }
         },
         shape = RoundedCornerShape(12.dp),
-        containerColor = PurpleBackground
+        containerColor = MaterialTheme.colorScheme.surface
     )
 }
 
@@ -315,7 +310,7 @@ fun LogoutDialog(
         AlertDialog(
             onDismissRequest = onDismiss,
             title = {
-                Text(text = "Logout")
+                Text(text = "Logout", color = MaterialTheme.colorScheme.onBackground)
             },
             text = {
                 Text(text = "Are you sure you want to logout?")
@@ -323,7 +318,7 @@ fun LogoutDialog(
             confirmButton = {
                 Button(
                     onClick = onClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = logOutRed),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     shape = RoundedCornerShape(15.dp)
                 ) {
                     Text("Yes, Logout", color = Color.White)
@@ -335,11 +330,11 @@ fun LogoutDialog(
                     shape = RoundedCornerShape(15.dp)
                 )
                 {
-                    Text("No, Cancel", color = Purple40)
+                    Text("No, Cancel", color = MaterialTheme.colorScheme.primary)
                 }
             },
             shape = RoundedCornerShape(12.dp),
-            containerColor = PurpleBackground
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 }
@@ -351,7 +346,7 @@ fun PersonalScoreboardRow(sessionDate: String,
 
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = PurpleBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -367,12 +362,12 @@ fun PersonalScoreboardRow(sessionDate: String,
             Text(
                 text = sessionDate,
                 style = MaterialTheme.typography.bodyLarge,
-                color = Purple40
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = "$points points",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Purple40
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
