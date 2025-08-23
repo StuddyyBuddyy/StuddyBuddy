@@ -3,6 +3,7 @@ package appdev.studybuddy.composables.home
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,8 +74,7 @@ fun HomeScreen(
     StudyBuddyScaffold {
         var displaySessionDialog by remember { mutableStateOf(false) }
         var displayLogoutDialog by remember { mutableStateOf(false) }
-        var selectedSession by remember { mutableStateOf<Pair<String, Int>?>(null) }
-        var displaySessionDetails by remember { mutableStateOf(false) }
+        var selectedSession by remember { mutableStateOf<Session?>(null) }
 
 
         if (displaySessionDialog) {
@@ -86,6 +86,7 @@ fun HomeScreen(
 
         var sortedSessions: List<Session> by remember { mutableStateOf(emptyList()) }
         var userTotalPoints: Int by remember { mutableIntStateOf(0) }
+
         LaunchedEffect(userVM.currentUser) {
             userVM.currentUser?.let { user ->
                 sortedSessions = dataVM.sortSessionsByPoints(user)
@@ -112,14 +113,13 @@ fun HomeScreen(
             )
         }
 
-        if (displaySessionDetails) {
-            LogoutDialog(
-                onDismiss = { displaySessionDetails = false },
-                onClick = {
-
-                }
+        if (selectedSession != null) {
+            SessionDetailsDialog(
+                session = selectedSession!!,
+                onDismiss = { selectedSession = null }
             )
         }
+
 
         Row(
             modifier = Modifier
@@ -229,7 +229,7 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(sortedSessions) { session ->
-                        PersonalScoreboardRow(session.date, session.points)
+                        PersonalScoreboardRow(session.date, session.points, onClick = { selectedSession = session })
                     }
                 }
             }
@@ -263,52 +263,42 @@ fun HomeScreen(
     }
 }
 
-/*
 /**
  * Dialog um den Session Details anzuzeigen
  */
 @Composable
-fun SessionDetails(
-    onDismiss: () -> Unit,
-    onClick: () -> Unit
+fun SessionDetailsDialog(
+    session: Session,
+    onDismiss: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = {
-                Text(text = "Logout")
-            },
-            text = {
-                Text(text = "Are you sure you want to logout?")
-            },
-            confirmButton = {
-                Button(
-                    onClick = onClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = logOutRed),
-                    shape = RoundedCornerShape(15.dp)
-                ) {
-                    Text("Yes, Logout", color = Color.White)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Session Details", fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("ID: ${session.id}")
+                Text("Date: ${session.date}")
+                Text("Duration: ${session.duration/60} minutes")
+                Text("Points: ${session.points}")
+                if(session.description != null) {
+                    Text("Description: ${session.description}")
                 }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = onDismiss,
-                    shape = RoundedCornerShape(15.dp)
-                )
-                {
-                    Text("No, Cancel", color = Purple40)
-                }
-            },
-            shape = RoundedCornerShape(12.dp),
-            containerColor = PurpleBackground
-        )
-    }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(15.dp)
+            ) {
+                Text("Close")
+            }
+        },
+        shape = RoundedCornerShape(12.dp),
+        containerColor = PurpleBackground
+    )
 }
-
- */
 
 /**
  * Dialog um den Logout zu bestätigen/ zu canceln
@@ -355,7 +345,9 @@ fun LogoutDialog(
 }
 
 @Composable
-fun PersonalScoreboardRow(sessionDate: String, points: Int){
+fun PersonalScoreboardRow(sessionDate: String,
+                          points: Int,
+                          onClick: () -> Unit){
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -363,6 +355,7 @@ fun PersonalScoreboardRow(sessionDate: String, points: Int){
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier
