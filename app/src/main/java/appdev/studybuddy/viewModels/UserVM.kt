@@ -40,6 +40,11 @@ class UserVM @Inject constructor(
     }
 
 
+    /**
+     * uses the given password and email to verify the login
+     * bypassPassword skips password check if true (for example when autologin)
+     * returns true if successful else false
+     */
     fun login(email: String, password: String, bypassPassword: Boolean = false): Boolean {
         val userNullable: User?
         runBlocking {
@@ -61,14 +66,25 @@ class UserVM @Inject constructor(
         }
     }
 
+    /**
+     * hashes the password for the database and communication
+     */
     fun hashPassword(password: String): String {
         return BCrypt.hashpw(password, BCrypt.gensalt(12))
     }
 
+    /**
+     * verifies the password with the hashed values
+     */
     fun verifyPassword(password: String, hashedPassword: String): Boolean {
         return BCrypt.checkpw(password, hashedPassword)
     }
 
+    /**
+     * for refistering a new user
+     * checks wheter a user alredy exist and adds the new one when possible
+     * returns true if successful else false
+     */
     fun register(email: String, password: String, username: String): Boolean {
         val user = User(username, email, hashPassword(password))
         var success: Boolean
@@ -83,10 +99,16 @@ class UserVM @Inject constructor(
         return success
     }
 
+    /**
+     * automatically logs in the last loaded user
+     */
     fun autoLogin(): Boolean {
         return currentUser != null && login(currentUser!!.email, "", bypassPassword = true)
     }
 
+    /**
+     * logs the user out
+     */
     fun logout() {
         viewModelScope.launch {
             userPreferences.clearLastUser()
