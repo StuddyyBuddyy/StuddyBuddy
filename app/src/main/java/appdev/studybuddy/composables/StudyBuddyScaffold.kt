@@ -13,6 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import appdev.studybuddy.controller.SnackBarController
 
+/**
+ * the Scaffold used by all Screens in the app
+ */
 @Composable
 fun StudyBuddyScaffold(
     content: @Composable ()-> Unit
