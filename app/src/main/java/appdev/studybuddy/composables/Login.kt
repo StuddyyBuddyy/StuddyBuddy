@@ -58,25 +58,23 @@ fun LoginScreen(
 
     var showPassword by remember { mutableStateOf(false) }
 
-    var hasPermission by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    //---------------Permissions-------------
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        hasPermission = isGranted
     }
 
     LaunchedEffect(Unit) {
         if (ActivityCompat.checkSelfPermission(context, RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
             Log.i("Recording Audio", "already granted")
-            hasPermission = true
         } else {
-            hasPermission = false
             permissionLauncher.launch(RECORD_AUDIO)
         }
     }
 
+    //setting scope function login for logging in
     val login = {
         if (userVM.login(email, password)) {
             navController.navigate("home")
@@ -85,6 +83,7 @@ fun LoginScreen(
         }
     }
 
+    //---------------------View------------------------
     StudyBuddyScaffold {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -92,10 +91,12 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            //----------Header-------------
             Text(
                 text = "StudyBuddy"
             )
 
+            //---------Box for showing Login Error-----------
             Box(
                 modifier = Modifier
                     .height(48.dp)
@@ -107,6 +108,7 @@ fun LoginScreen(
                 }
             }
 
+            //----------TextField for email----------------
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -115,7 +117,8 @@ fun LoginScreen(
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
-            
+
+            //----------TextField for password----------------
             OutlinedTextField(
                 value = password,
                 onValueChange = { newText ->
@@ -158,6 +161,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            //---------Buttons for Logging in and registering---------
             Button(
                 onClick = login
             ) {
@@ -212,6 +216,7 @@ fun RegisterScreen(
     var username by remember { mutableStateOf("") }
     var failed by remember { mutableStateOf(false) }
 
+    //setting scope function login for logging in
     val register = {
         if (userVM.register(email, password, username)) {
             navController.navigate("home")
@@ -227,10 +232,13 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            //----------Header--------------
             Text(
                 text = "StudyBuddy"
             )
 
+            //----------Box for Error Message-----------
             Box(
                 modifier = Modifier
                     .height(48.dp)
@@ -242,6 +250,7 @@ fun RegisterScreen(
                 }
             }
 
+            //----------TextField for email----------------
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -251,6 +260,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            //----------TextField for username----------------
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -260,6 +270,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            //----------TextField for password----------------
             OutlinedTextField(
                 value = password,
                 onValueChange = { newText ->
@@ -300,6 +311,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            //------------Button for Registering-----------
             Button(
                 onClick = register
             ) {
