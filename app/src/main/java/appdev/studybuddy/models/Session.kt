@@ -2,6 +2,10 @@ package appdev.studybuddy.models
 
 import kotlinx.serialization.Serializable
 
+/**
+ * the object representing the Sessions in the DB
+ */
+
 @Serializable
 data class Session(
     val id: Int? = null,
