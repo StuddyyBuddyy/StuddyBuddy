@@ -58,22 +58,18 @@ fun LoginScreen(
 
     var showPassword by remember { mutableStateOf(false) }
 
-    var hasPermission by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     //---------------Permissions-------------
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        hasPermission = isGranted
     }
 
     LaunchedEffect(Unit) {
         if (ActivityCompat.checkSelfPermission(context, RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
             Log.i("Recording Audio", "already granted")
-            hasPermission = true
         } else {
-            hasPermission = false
             permissionLauncher.launch(RECORD_AUDIO)
         }
     }
