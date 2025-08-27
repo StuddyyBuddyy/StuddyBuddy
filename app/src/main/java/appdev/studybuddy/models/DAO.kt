@@ -11,9 +11,14 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
+/**
+ * the DAO for the Database and the Dog Image APi
+ */
 class DAO {
 
     //-------------DB-------------
+
+    //the Http Client for accessing the Database
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json()
@@ -21,6 +26,9 @@ class DAO {
     }
     val url = BuildConfig.SERVER_URL
 
+    /**
+     * GETs all Users in the DB
+     */
     suspend fun getAllUsers(): List<User> {
         return try {
             client.get("$url/users").body()
@@ -30,6 +38,9 @@ class DAO {
         }
     }
 
+    /**
+     * GETs User with the given email
+     */
     suspend fun getUserByEmail(email: String): User? {
         val user =
             try {
@@ -45,6 +56,9 @@ class DAO {
         return user
     }
 
+    /**
+     * GETs all Sessions associated with the User identified by email
+     */
     suspend fun getUserSessions(email: String): List<Session> {
         return try {
             client.get("$url/sessions") {
@@ -59,7 +73,9 @@ class DAO {
     }
 
 
-
+    /**
+     * sends POST for new inserting given USer
+     */
     suspend fun insertUser(user: User): Boolean {
         return try {
             val response = client.post("$url/users") {
@@ -73,6 +89,9 @@ class DAO {
         }
     }
 
+    /**
+     * sends POST for inserting given Session
+     */
     suspend fun insertSession(session: Session): Boolean {
         return try {
             val response = client.post("$url/sessions") {
@@ -87,6 +106,8 @@ class DAO {
     }
 
     // ----------- Dog API --------------
+
+    //the Http Client for accessing the Database
     val dogClient = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })

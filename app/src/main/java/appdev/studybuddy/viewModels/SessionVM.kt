@@ -212,6 +212,9 @@ class SessionVM @Inject  constructor(
         return successful
     }
 
+    /**
+     * creates the object for the database communication
+     */
     @SuppressLint("SimpleDateFormat")
     fun createCompanionObject(points : Int) : Session {
 
@@ -228,6 +231,9 @@ class SessionVM @Inject  constructor(
         )
     }
 
+    /**
+     * calculates the points for the Session based on activated Sensors and time
+     */
     fun calculatePoints(fail: Boolean) : Int {
         var points = sessionProperties.value.duration
         if (fail)
@@ -247,6 +253,9 @@ class SessionVM @Inject  constructor(
     val apiKey = BuildConfig.DOG_API_KEY
 
 
+    /**
+     * fetches the dog image from the dog.ceo api and sets the dogImageUrl as the response
+     */
     fun fetchDogImage() {
         viewModelScope.launch {
             try {
@@ -262,6 +271,9 @@ class SessionVM @Inject  constructor(
         }
     }
 
+    /**
+     * loads the image from the fetched Url
+     */
     suspend fun loadBitmapFromUrl(url: String): ImageBitmap? {
         return withContext(Dispatchers.IO) {
             try {
@@ -275,6 +287,9 @@ class SessionVM @Inject  constructor(
         }
     }
 
+    /**
+     * downlads the loaded image to gallery
+     */
     fun saveImageToGallery(
         context: Context,
         image: ImageBitmap,

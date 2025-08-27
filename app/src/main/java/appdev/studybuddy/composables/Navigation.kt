@@ -12,6 +12,10 @@ import appdev.studybuddy.viewModels.*
 import appdev.studybuddy.composables.home.HomeScreen
 import appdev.studybuddy.composables.session.SessionScreen
 
+/**
+ * sets up the NavController and the NAvHost for Navigation in the app
+ * also sets upd the hiltVMs used throughout the app
+ */
 @Composable
 fun NavSetup() {
     val navController = rememberNavController()

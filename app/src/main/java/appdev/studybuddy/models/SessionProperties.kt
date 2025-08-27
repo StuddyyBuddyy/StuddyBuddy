@@ -2,6 +2,9 @@ package appdev.studybuddy.models
 
 import kotlinx.serialization.Serializable
 
+/**
+ * the Object for Saving Session Properties not used by the DB
+ */
 @Serializable
 data class SessionProperties(
     var useMovementSensor: Boolean = false,
