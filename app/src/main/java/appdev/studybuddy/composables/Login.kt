@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +42,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import appdev.studybuddy.viewModels.UserVM
 
+/**
+ * the View for Logging in
+ * leads to RegisterScreen when User presses Register Button
+ * or to HomeScreen when successfully Login in
+ */
 @Composable
 fun LoginScreen(
     navController: NavController,
@@ -192,6 +196,10 @@ fun LoginScreen(
     }
 }
 
+/**
+ * the View for Registering
+ * leads to Home when successful
+ */
 @Composable
 fun RegisterScreen(
     navController: NavController,
@@ -297,7 +305,6 @@ fun RegisterScreen(
             ) {
                 Text(text = "Register")
             }
-
         }
     }
 }
