@@ -26,6 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import appdev.studybuddy.viewModels.SessionVM
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun EndSessionDialogFail(
@@ -36,15 +38,26 @@ fun EndSessionDialogFail(
         Column(modifier = Modifier.padding(16.dp)) {
             Text("End Session?")
             Text("Are you sure you want to end this session early?")
-            Row {
-                Button(onClick = onConfirm, shape = RoundedCornerShape(15.dp)) {
-                    Text("Confirm")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(15.dp)
+                ) {
+                    Text("Cancel")
                 }
 
-                Spacer(modifier = Modifier.padding(10.dp))
-
-                Button(onClick = onDismiss, shape = RoundedCornerShape(15.dp)) {
-                    Text("Cancel")
+                Button(
+                    onClick = onConfirm,
+                    shape = RoundedCornerShape(15.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor =  MaterialTheme.colorScheme.onError),
+                ) {
+                    Text("Confirm")
                 }
             }
         }
@@ -101,6 +114,9 @@ fun DescriptionDialog(
     DialogBox {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Please Enter Description for this Session!")
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             TextField(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -108,7 +124,27 @@ fun DescriptionDialog(
                 value = text,
                 onValueChange = { text = it }
             )
-            Row(modifier = Modifier.padding(16.dp)) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                if (dismissable) {
+                    Button(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(15.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        )
+                    ) {
+                        Text("Dismiss")
+                    }
+                }
+
                 Button(
                     onClick = {
                         onConfirm()
@@ -118,17 +154,9 @@ fun DescriptionDialog(
                 ) {
                     Text("Confirm")
                 }
-
-                if (dismissable) {
-
-                    Spacer(modifier = Modifier.padding(10.dp))
-
-                    Button(onClick = onDismiss, shape = RoundedCornerShape(15.dp)) {
-                        Text("Dismiss")
-                    }
-                }
             }
         }
+
     }
 }
 

@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -203,7 +204,7 @@ fun SessionScreen(
                 )
 
                 Spacer(modifier = Modifier.padding(10.dp))
-
+                
                 Button(
                     onClick = {
                         dialogOption = DialogOption.INTERRUPT

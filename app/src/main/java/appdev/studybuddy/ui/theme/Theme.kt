@@ -55,7 +55,7 @@ private val LightColorScheme = lightColorScheme(
 
     primaryContainer = PurpleBackground2,
     onPrimaryContainer = Color.White,
-    secondaryContainer = Pink,
+    secondaryContainer = LightPink,
     onSecondaryContainer = DarkGrey,
     tertiaryContainer = Grey,
     onTertiaryContainer = Beige,
