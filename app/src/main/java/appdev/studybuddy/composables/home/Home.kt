@@ -259,7 +259,7 @@ fun HomeScreen(
 }
 
 /**
- * Dialog um den Session Details anzuzeigen
+ * Dialog um die Details einer Session anzuzeigen
  */
 @Composable
 fun SessionDetailsDialog(
