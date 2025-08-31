@@ -44,8 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import appdev.studybuddy.viewModels.SessionVM
 
 /**
- * Dialog um generelle Einstellungen für eine Session einzustellen:
- * (Dauer, welche Sensoren verwendet werden sollen, ..)
+ * Dialog to set overall session properties/settings:
+ * (duration, sensor feedback, numberbreaks, break duration ..)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,6 +103,7 @@ fun SessionPropertiesDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 item{
+                    //---------TimerInput for Session duration---------
                     LabeledBox("Session Duration:") {
                         TimeInput(
                             state = durationTimerInput
@@ -111,6 +112,7 @@ fun SessionPropertiesDialog(
                 }
 
                 item {
+                    //---------TimerInput for Break duration and Textfield for Number of breaks---------
                     LabeledBox("Breaks:") {
                         TimeInput(
                             state = breakDurationTimerInput
@@ -146,6 +148,7 @@ fun SessionPropertiesDialog(
                 }
 
                 item {
+                    //---------Switch Buttons to set sensor feedback---------
                     LabeledBox("Sensor Feedback:") {
                         SessionSettingsRow("Allow Sound Feedback:") {
                             Switch(
@@ -267,7 +270,7 @@ fun LabeledBox(
 }
 
 /**
- * Zeile innerhalb einer LabeldBox()
+ * row in LabeldBox()
  */
 @Composable
 fun SessionSettingsRow(

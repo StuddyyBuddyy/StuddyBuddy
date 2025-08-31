@@ -229,32 +229,6 @@ fun SessionScreen(
                 }
             }
 
-            Column( //Column am unteren Bildschirmrand für Sensor Debugging
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-            ) {
-                val lightLevel by viewModel.lightLevel.collectAsState()
-                val soundAmplitude by viewModel.soundAmplitude.collectAsState()
-                val movementMagnitude by viewModel.movementMagnitude.collectAsState()
-
-                Text(
-                    text = "Debug Light: $lightLevel"
-                )
-                Spacer(Modifier.padding(3.dp))
-                Text(
-                    text = "Debug Sound: $soundAmplitude"
-                )
-                Spacer(Modifier.padding(3.dp))
-                Text(
-                    text = "Debug Movement: $movementMagnitude"
-                )
-                Spacer(Modifier.padding(3.dp))
-                Text(
-                    text = "Was Moved Counter: $wasMobileMoved"
-                )
-            }
-
             when (dialogOption) {
                 DialogOption.NONE -> {}
 

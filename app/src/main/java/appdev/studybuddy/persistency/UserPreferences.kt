@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "preferences")
 
 /**
- * PreferenceDataStore um die letzten User-Login-Daten und Session-Properties zu speichern.
+ * PreferenceDataStore to save the latest login data and sessionproperties
  */
 class UserPreferences (
     private val context: Context
@@ -43,6 +43,7 @@ class UserPreferences (
         }
     }
 
+    //Save/Setter Methods
     suspend fun saveBaseEmail(email: String){ context.dataStore.edit { preferences -> preferences[BASE_EMAIL] = email } }
     suspend fun saveBasePassword(password: String){ context.dataStore.edit { preferences -> preferences[BASE_PASSWORD] = password } }
     suspend fun saveBaseUsername(username: String){ context.dataStore.edit { preferences -> preferences[BASE_USERNAME] = username } }
