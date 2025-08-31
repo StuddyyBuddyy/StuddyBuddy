@@ -232,6 +232,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.padding(30.dp))
 
             Row() {
+                //---------Button to start session---------
                 Button(
                     onClick = {
                         navController.navigate("session")
@@ -241,6 +242,7 @@ fun HomeScreen(
                     Text(text = "Start Session")
                 }
 
+                //---------Button to open SessionPropertiesDialog---------
                 IconButton(
                     onClick = {
                         displaySessionDialog = true

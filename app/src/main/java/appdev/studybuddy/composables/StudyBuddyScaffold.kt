@@ -22,7 +22,7 @@ fun StudyBuddyScaffold(
 ) {
     val snackBarState = remember { SnackbarHostState() }
 
-    LaunchedEffect(SnackBarController.events) {
+    LaunchedEffect(SnackBarController.events) { //collect SnackbarEvents from SnackBarController and show in Scaffold
         SnackBarController.events.collect { event ->
             snackBarState.showSnackbar(
                 message = event.message,

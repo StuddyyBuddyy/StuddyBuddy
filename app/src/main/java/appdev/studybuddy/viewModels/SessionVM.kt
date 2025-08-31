@@ -60,14 +60,14 @@ class SessionVM @Inject  constructor(
 
     private val BRIGHTNESS_THRESHOLD = 10
     private val SOUND_THRESHOLD = 750
-    private val MOVEMENT_TRHESOLD = 1f //Grenzwert wenn Handy mehr als x bewegt wird/ bzw. von BASE_ACCELERATION abweicht
+    private val MOVEMENT_TRHESOLD = 1f
     private val BASE_ACCELERATION = 9.81f
     val MOVEMENT_LIMIT = 2
 
     private var _sessionProperties = MutableStateFlow<SessionProperties>(SessionProperties())
     val sessionProperties: StateFlow<SessionProperties> = _sessionProperties
 
-    private var _isInvalidBreak = MutableStateFlow<Boolean>(false) //Indikator ob Pausen valid sind im Verhältnis zur Session-Dauer
+    private var _isInvalidBreak = MutableStateFlow<Boolean>(false) //indicates if a pause is valid (in relation to session duration)
     val isInvalidBreak: StateFlow<Boolean> = _isInvalidBreak
 
     private var _overallElapsedSeconds = MutableStateFlow<Int>(0)
@@ -108,10 +108,10 @@ class SessionVM @Inject  constructor(
 
     init {
         viewModelScope.launch {
-            userPreferences.lastSessionProperties.collect { it -> _sessionProperties.value = it }
+            userPreferences.lastSessionProperties.collect { it -> _sessionProperties.value = it } //collect SessionProperties from UserPreferences
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch {  //collect Sensordata from SensorRepository
             combine(
                 sensorRepository.lightLevel,
                 sensorRepository.soundAmplitude,
@@ -126,7 +126,7 @@ class SessionVM @Inject  constructor(
             }.collect()
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch { //collect Sensordata from SensorRepository
             sensorRepository.accelerationMagnitude.collect { it ->
                 _movementMagnitude.value = it
 
@@ -148,7 +148,7 @@ class SessionVM @Inject  constructor(
     }
 
     /**
-     * Starte den Timer im SessionScreen. Trackt dabei Pausen (wechselt isBreak)
+     * starts timer and manages Sessions and Break segments
      */
     suspend fun startTimer(){
         interrupt = false
@@ -183,7 +183,7 @@ class SessionVM @Inject  constructor(
     }
 
     /**
-     * Session beenden und in Datenbank speichern
+     * ends sessions, calculates points and saves it to database
      */
     fun endSession(fail : Boolean = false) : Boolean{
         val points = calculatePoints(fail)
@@ -324,6 +324,9 @@ class SessionVM @Inject  constructor(
     }
 
     //-----------Sensors --------------
+    /**
+     * registers the corresponding sensors via the SensorRepository if the users allows/wants the corresponding feedback.
+     */
     fun onResume(){
         if(sessionProperties.value.useSoundSensor){
             sensorRepository.registerSoundSensor(sessionProperties.value.useSoundSensor)
@@ -344,6 +347,9 @@ class SessionVM @Inject  constructor(
         }
     }
 
+    /**
+     * unregisters sensors
+     */
     fun onPause(){
         sensorRepository.unregisterSoundSensor()
         sensorRepository.unregisterBrightnessSensor()
@@ -435,6 +441,7 @@ class SessionVM @Inject  constructor(
         }
     }
 
+    //-----------Vibration & Sound --------------
 
     /**
      * Sound wenn eine Pause beginnt.

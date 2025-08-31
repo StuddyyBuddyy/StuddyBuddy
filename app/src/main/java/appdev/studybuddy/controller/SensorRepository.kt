@@ -22,7 +22,7 @@ class SensorRepository(
     var brightnessSensor: Sensor? = null
     var movementSensor: Sensor? = null
 
-    var soundTacking: File? = null
+    var soundTacking: File? = null //temp File to track recored sound
 
     private val _lightLevel = MutableStateFlow<Float>(100f)
     val lightLevel: StateFlow<Float> = _lightLevel
@@ -38,6 +38,10 @@ class SensorRepository(
         movementSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
 
+    /**
+     * registers and starts sound recording if useMicroPhone = true
+     * @param useMicroPhone
+     */
     fun registerSoundSensor(useMicroPhone: Boolean){
         if (soundSensor == null && useMicroPhone) {
             soundTacking = File.createTempFile("tempSoundTracking", ".3gp", context.cacheDir)
@@ -59,12 +63,18 @@ class SensorRepository(
         }
     }
 
+    /**
+     * register Light sensor
+     */
     fun registerBrightnessSensor() {
         brightnessSensor?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
 
+    /**
+     * register Acceleration sensor
+     */
     fun registerMovementSensor() {
         movementSensor?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
@@ -88,6 +98,10 @@ class SensorRepository(
         sensorManager.unregisterListener(this)
     }
 
+    /**
+     * handle Light and acceleration sensor events. Calculates magnitude from acceleration x,y and z to determine mobile movement.
+     * @param event
+     */
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_LIGHT) { //Brightness Sensor Event
             _lightLevel.value = event.values[0]
@@ -106,6 +120,9 @@ class SensorRepository(
         //Not used
     }
 
+    /**
+     * suspend function to record microphone sound once every second.
+     */
     suspend fun recordSound(){
         while (soundSensor!=null) {
             delay(1000)
