@@ -72,14 +72,6 @@ fun HomeScreen(
         var displayLogoutDialog by remember { mutableStateOf(false) }
         var selectedSession by remember { mutableStateOf<Session?>(null) }
 
-
-        if (displaySessionDialog) {
-            SessionPropertiesDialog(
-                onDismiss = { displaySessionDialog = false },
-                viewModel = sessionVM
-            )
-        }
-
         var sortedSessions: List<Session> by remember { mutableStateOf(emptyList()) }
         var userTotalPoints: Int by remember { mutableIntStateOf(0) }
 
@@ -92,7 +84,7 @@ fun HomeScreen(
 
         var showLoading by remember { mutableStateOf(sortedSessions.isEmpty()) }
 
-        // Falls keine Sessions -> starte Timer für 5 Sekunden
+        // If no sessions are found, show loading screen for 5 seconds
         LaunchedEffect(sortedSessions) {
             if (sortedSessions.isEmpty()) {
                 delay(5000)
@@ -102,9 +94,11 @@ fun HomeScreen(
             }
         }
 
-
-        BackHandler {
-            //Do Nothing on Back Button/
+        if (displaySessionDialog) {
+            SessionPropertiesDialog(
+                onDismiss = { displaySessionDialog = false },
+                viewModel = sessionVM
+            )
         }
 
         if (displayLogoutDialog) {
@@ -129,11 +123,15 @@ fun HomeScreen(
             )
         }
 
+        BackHandler {
+            //Do Nothing on Back Button/
+        }
 
         Row(
             modifier = Modifier
                 .padding(top = 30.dp, start = 15.dp, end = 15.dp)
         ) {
+            //----------Logout Button----------------
             Button(
                 onClick = {
                     displayLogoutDialog = true
@@ -145,6 +143,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
+            //----------Button leading to Leaderboard Screen----------------
             IconButton(
                 onClick = {
                     navController.navigate("leaderboard")
@@ -177,7 +176,8 @@ fun HomeScreen(
             )
 
             Spacer(modifier = Modifier.padding(10.dp))
-            
+
+            //----------Loading Animation----------------
             if(showLoading){
                 val composition by rememberLottieComposition(
                     LottieCompositionSpec.RawRes(R.raw.loadingbook)
@@ -201,6 +201,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.padding(10.dp))
 
+                //----------Row for showing total score----------------
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -230,9 +231,9 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.padding(10.dp))
 
+                //----------Lazy Column/ Scrollable list for showing all sessions (sorted by points descending)----------------
                 LazyColumn(
                     modifier = Modifier
-                        //.fillMaxSize()
                         .height(200.dp)
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -275,7 +276,15 @@ fun HomeScreen(
 }
 
 /**
- * Dialog um die Details einer Session anzuzeigen
+ * Displays a dialog containing detailed information about a given [Session].
+ *
+ * This composable shows an [AlertDialog] with the session's ID, date, duration,
+ * points, and optional description. It also provides a confirmation button
+ * to close the dialog.
+ *
+ * @param session The [Session] object whose details will be displayed.
+ * @param onDismiss Callback invoked when the dialog is dismissed or
+ *                  the close button is pressed.
  */
 @Composable
 fun SessionDetailsDialog(
@@ -314,6 +323,7 @@ fun SessionDetailsDialog(
                 }
             }
         },
+        //----------Button to close session details----------------
         confirmButton = {
             Button(
                 onClick = onDismiss,
@@ -328,7 +338,15 @@ fun SessionDetailsDialog(
 }
 
 /**
- * Dialog um den Logout zu bestätigen/ zu canceln
+ * Displays a confirmation dialog for logging out.
+ *
+ * This composable shows an [AlertDialog] that asks the user to confirm or cancel
+ * the logout action. It provides two buttons: one to confirm the logout and another
+ * to cancel and dismiss the dialog.
+ *
+ * @param onDismiss Callback invoked when the user cancels the action or
+ *                  dismisses the dialog.
+ * @param onClick Callback invoked when the user confirms the logout action.
  */
 @Composable
 fun LogoutDialog(
@@ -347,6 +365,7 @@ fun LogoutDialog(
             text = {
                 Text(text = "Are you sure you want to logout?")
             },
+            //----------Button to confirm logout----------------
             confirmButton = {
                 Button(
                     onClick = onClick,
@@ -356,6 +375,7 @@ fun LogoutDialog(
                     Text("Yes, Logout", color = Color.White)
                 }
             },
+            //----------Button to cancel logout----------------
             dismissButton = {
                 OutlinedButton(
                     onClick = onDismiss,
@@ -371,6 +391,17 @@ fun LogoutDialog(
     }
 }
 
+/**
+ * Displays a row in the personal scoreboard with a session date and earned points.
+ *
+ * This composable uses a [Card] that shows the session's date on the left
+ * and the corresponding points on the right. The entire row is clickable
+ * and can trigger a given action when selected.
+ *
+ * @param sessionDate The formatted date string representing the session.
+ * @param points The number of points earned in the session.
+ * @param onClick Callback invoked when the row is clicked.
+ */
 @Composable
 fun PersonalScoreboardRow(sessionDate: String,
                           points: Int,
