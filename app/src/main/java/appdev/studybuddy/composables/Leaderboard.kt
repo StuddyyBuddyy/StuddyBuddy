@@ -52,6 +52,7 @@ fun LeaderboardScreen(
     StudyBuddyScaffold {
 
         var leaderboard: Map<String, Int> by remember { mutableStateOf(emptyMap()) }
+
         LaunchedEffect(Unit) {
             leaderboard = dataVM.sortUsersByPoints()
         }
@@ -61,6 +62,7 @@ fun LeaderboardScreen(
                 modifier = Modifier
                 .padding(top = 30.dp, start = 15.dp, end = 15.dp)
             ){
+                //----------Back-Button to Home Screen----------------
                 IconButton(
                     onClick = {
                         navController.popBackStack()
@@ -88,6 +90,7 @@ fun LeaderboardScreen(
 
             Spacer(modifier = Modifier.padding(10.dp))
 
+            //----------Loading animation for Leaderboard----------------
             if(leaderboard.isEmpty()){
                 val composition by rememberLottieComposition(
                     LottieCompositionSpec.RawRes(R.raw.loadingbook)
@@ -110,6 +113,7 @@ fun LeaderboardScreen(
 
                 Spacer(modifier = Modifier.padding(10.dp))
 
+                //----------Lazy Column/ Scrollable List for showing all users (sorted by points descending----------------
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -125,7 +129,18 @@ fun LeaderboardScreen(
     }
 }
 
-
+/**
+ * Displays a row in the leaderboard with a username and their points.
+ *
+ * Highlights the current user's row by changing the background color,
+ * text color, and font weight. Other users are displayed with the
+ * default styling.
+ *
+ * @param username The name of the user to be displayed in the leaderboard.
+ * @param points The number of points the user has earned.
+ * @param currentUsername The username of the currently logged-in user,
+ *                        used to determine whether this row should be highlighted.
+ */
 @Composable
 fun LeaderboardRow(username: String, points: Int, currentUsername: String) {
 
