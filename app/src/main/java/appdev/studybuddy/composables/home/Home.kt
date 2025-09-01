@@ -57,6 +57,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -88,6 +89,19 @@ fun HomeScreen(
                 userTotalPoints = dataVM.addSessionPoints(user)
             }
         }
+
+        var showLoading by remember { mutableStateOf(sortedSessions.isEmpty()) }
+
+        // Falls keine Sessions -> starte Timer für 5 Sekunden
+        LaunchedEffect(sortedSessions) {
+            if (sortedSessions.isEmpty()) {
+                delay(5000)
+                showLoading = false
+            } else {
+                showLoading = false
+            }
+        }
+
 
         BackHandler {
             //Do Nothing on Back Button/
@@ -164,7 +178,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.padding(10.dp))
             
-            if(sortedSessions.isEmpty() ){
+            if(showLoading){
                 val composition by rememberLottieComposition(
                     LottieCompositionSpec.RawRes(R.raw.loadingbook)
                 )
