@@ -11,13 +11,14 @@ class DataVM : ViewModel() {
     val userPoints = mutableMapOf<String, Int>()
 
     /**
-     * Berechnet die Gesamtpunkte aller User und gibt sie absteigend sortiert zurück.
+     * Calculates the total points of all users and returns them in descending order.
      *
-     * Die Methode lädt alle Benutzer aus der Datenbank, summiert deren Sitzungs-Punkte
-     * (über [addSessionPoints]), speichert sie in [userPoints] und gibt schließlich eine
-     * nach Punkten absteigend sortierte Map zurück.
-     * @return Eine Map, die die Benutzernamen als Schlüssel und die Gesamtpunkte dieses Users
-     *         als Wert enthält, absteigend nach Punkten sortiert.
+     * This method loads all users from the database, sums up their session points
+     * (via [addSessionPoints]), stores them in [userPoints], and finally returns
+     * a map sorted by points in descending order.
+     *
+     * @return A map where the keys are usernames and the values are their total points,
+     *         sorted in descending order by points.
      */
     suspend fun sortUsersByPoints(): Map<String, Int>{
             for (user in dao.getAllUsers()) {
@@ -29,13 +30,13 @@ class DataVM : ViewModel() {
     }
 
     /**
-     * Berechnet die Gesamtpunkte eines bestimmten Users.
+     * Calculates the total points of a specific user.
      *
-     * Die Methode summiert alle Punkte aus den Sitzungen des Users,
-     * die aus der Datenbank über [dao.getUserSessions] geladen werden.
+     * This method sums up all points from the sessions of the given user,
+     * which are loaded from the database via [dao.getUserSessions].
      *
-     * @param user Der User, dessen Sitzungs-Punkte summiert werden sollen.
-     * @return Die Summe aller Punkte des Users.
+     * @param user The user whose session points should be summed up.
+     * @return The total sum of all points of the user.
      */
     suspend fun addSessionPoints(user: User): Int{
         var totalPoints = 0
@@ -47,13 +48,14 @@ class DataVM : ViewModel() {
     }
 
     /**
-     * Sortiert die Sitzungen eines Users nach deren Punkten.
+     * Sorts the sessions of a user by their points.
      *
-     * Die Methode lädt alle Sitzungen eines Users aus der Datenbank und
-     * gibt sie sortiert zurück, sodass die Sitzung mit den meisten Punkten zuerst erscheint.
+     * This method loads all sessions of a given user from the database
+     * and returns them sorted so that the session with the highest points
+     * appears first.
      *
-     * @param user Der User, dessen Sitzungen sortiert werden sollen.
-     * @return Eine Liste der Sitzungen des Users, absteigend nach Punkten sortiert.
+     * @param user The user whose sessions should be sorted.
+     * @return A list of the user's sessions, sorted in descending order by points.
      */
     suspend fun sortSessionsByPoints(user: User): List<Session> {
         val sessions = dao.getUserSessions(user.email)
